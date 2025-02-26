@@ -1,0 +1,20 @@
+saya memiliki project scraping yang bekerja secara micro service. berikut strutur foldernya
+
+scrap_service/carlistmy_service/logs/carlistmy.log
+scrap_service/carlistmy_service/storage/database/
+scrap_service/carlistmy_service/storage/input_files/carlistMY_scraplist.csv
+scrap_service/carlistmy_service/app.py
+scrap_service/carlistmy_service/carlistmy_service.py
+
+scrap_service/mudahmy_service/logs/mudahmy.log
+scrap_service/mudahmy_service/storage/database/
+scrap_service/mudahmy_service/storage/input_files/mudahMY_scraplist.csv
+scrap_service/mudahmy_service/app.py
+scrap_service/mudahmy_service/mudahmy_service.py
+
+/home/fanfan/fanfan/scraping/scrap_service/carlistmy_service/carlistmy_service.py
+/home/fanfan/fanfan/scraping/scrap_service/carlistmy_service/database.py
+/home/fanfan/fanfan/scraping/scrap_service/carlistmy_service/app.py
+/home/fanfan/fanfan/scraping/scrap_service/carlistmy_service/models.py
+/home/fanfan/fanfan/scraping/scrap_service/carlistmy_service/logs/carlistmy.log
+/home/fanfan/fanfan/scraping/scrap_service/carlistmy_service/__init__.py

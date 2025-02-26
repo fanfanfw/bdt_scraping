@@ -1,0 +1,884 @@
+2025-02-25 13:03:10,499 - INFO - ====== WebDriver manager ======
+2025-02-25 13:03:10,609 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:03:10,689 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:03:10,809 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:03:11,225 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.7:5001
+2025-02-25 13:03:11,225 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 13:03:11,226 - INFO -  * Restarting with stat
+2025-02-25 13:03:12,044 - INFO - ====== WebDriver manager ======
+2025-02-25 13:03:12,164 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:03:12,281 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:03:12,398 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:03:12,836 - WARNING -  * Debugger is active!
+2025-02-25 13:03:12,837 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 13:03:13,672 - INFO - 🚀 Mulai scraping brand: alfa-romeo -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo
+2025-02-25 13:03:13,673 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo?o=1
+2025-02-25 13:03:23,562 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo?o=2
+2025-02-25 13:09:46,211 - INFO - ====== WebDriver manager ======
+2025-02-25 13:09:46,333 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:09:47,332 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:09:48,305 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:09:49,077 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 13:09:49,077 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 13:09:49,078 - INFO -  * Restarting with stat
+2025-02-25 13:09:49,790 - INFO - ====== WebDriver manager ======
+2025-02-25 13:09:49,901 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:09:50,882 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:09:51,860 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:09:52,257 - WARNING -  * Debugger is active!
+2025-02-25 13:09:52,258 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 13:09:57,433 - INFO - 🚀 Mulai scraping brand: alfa-romeo -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo
+2025-02-25 13:09:57,433 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo?o=1
+2025-02-25 13:10:09,473 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo?o=2
+2025-02-25 13:10:26,352 - ERROR - ⚠️ Error mengambil URL listing: Message: 
+
+2025-02-25 13:10:26,352 - INFO - ✅ Tidak ada lebih banyak listing. Berhenti di halaman 2.
+2025-02-25 13:10:26,352 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/sale-2020-alfa-romeo-giulia-2-0-veloce-blue-109809594.htm
+2025-02-25 13:10:42,751 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 13:10:42,751 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2018-alfa-romeo-stelvio-2-0-turbo-q4-se-105790657.htm
+2025-02-25 13:10:56,305 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 13:10:56,305 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/1999-alfa-romeo-166-3-0-v6-a-105418736.htm
+2025-02-25 13:11:09,988 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 13:11:09,988 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2012-alfa-romeo-giulietta-1-4-a-novitec-multiair-110239010.htm
+2025-02-25 13:11:24,076 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 13:11:24,076 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2006-alfa-romeo-147-2-0-twin-spark-selespeed-106017519.htm
+2025-02-25 13:12:43,204 - INFO - ====== WebDriver manager ======
+2025-02-25 13:12:43,322 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:12:44,429 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:12:45,408 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:12:46,225 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 13:12:46,225 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 13:12:46,226 - INFO -  * Restarting with stat
+2025-02-25 13:12:47,143 - INFO - ====== WebDriver manager ======
+2025-02-25 13:12:47,261 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:12:48,243 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:12:49,029 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:12:49,546 - WARNING -  * Debugger is active!
+2025-02-25 13:12:49,546 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 13:16:31,851 - INFO - ====== WebDriver manager ======
+2025-02-25 13:16:31,969 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:16:32,962 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:16:33,935 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:16:34,753 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 13:16:34,753 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 13:16:34,754 - INFO -  * Restarting with stat
+2025-02-25 13:16:35,597 - INFO - ====== WebDriver manager ======
+2025-02-25 13:16:35,713 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:16:36,693 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:16:37,673 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:16:38,063 - WARNING -  * Debugger is active!
+2025-02-25 13:16:38,064 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 13:17:39,053 - INFO - 🚀 Mulai scraping brand: alfa-romeo -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo
+2025-02-25 13:17:39,053 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo?o=1
+2025-02-25 13:17:50,682 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/alfa-romeo?o=2
+2025-02-25 13:18:07,707 - ERROR - ⚠️ Error mengambil URL listing: Message: 
+
+2025-02-25 13:18:07,707 - INFO - ✅ Tidak ada lebih banyak listing. Berhenti di halaman 2.
+2025-02-25 13:18:07,707 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2022-alfa-romeo-stelvio-2-0-turbo-q4-veloce-gt-jun-108082968.htm
+2025-02-25 13:18:24,372 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 13:18:24,372 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2012-alfa-romeo-giulietta-1-4-a-novitec-multiair-109764641.htm
+2025-02-25 13:18:38,447 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 13:18:38,447 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2017-alfa-romeo-giulia-quadrifoglio-9k-kms-mileage-106337234.htm
+2025-02-25 13:19:05,701 - INFO - ====== WebDriver manager ======
+2025-02-25 13:19:05,833 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:19:06,633 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:19:07,629 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:19:08,472 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 13:19:08,472 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 13:19:08,473 - INFO -  * Restarting with stat
+2025-02-25 13:19:09,406 - INFO - ====== WebDriver manager ======
+2025-02-25 13:19:09,525 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:19:10,326 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:19:11,303 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:19:11,785 - WARNING -  * Debugger is active!
+2025-02-25 13:19:11,786 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 13:19:23,092 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 13:19:23,093 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 13:19:37,319 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-25 13:19:50,020 - INFO - 📄 Scraping halaman 3 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=3
+2025-02-25 13:32:06,504 - INFO - ====== WebDriver manager ======
+2025-02-25 13:32:06,620 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:32:07,607 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:32:08,423 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:32:09,211 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 13:32:09,211 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 13:32:09,212 - INFO -  * Restarting with stat
+2025-02-25 13:32:10,182 - INFO - ====== WebDriver manager ======
+2025-02-25 13:32:10,293 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:32:11,106 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 13:32:11,888 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 13:32:12,285 - WARNING -  * Debugger is active!
+2025-02-25 13:32:12,286 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 13:32:16,854 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 13:32:16,854 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 13:32:30,210 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 13:32:30,210 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-25 13:32:40,049 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 13:32:40,049 - INFO - 📄 Scraping halaman 3 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=3
+2025-02-25 14:52:26,764 - INFO - ====== WebDriver manager ======
+2025-02-25 14:52:26,884 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:52:27,874 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:52:28,858 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 14:52:29,656 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 14:52:29,657 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 14:52:29,657 - INFO -  * Restarting with stat
+2025-02-25 14:52:30,374 - INFO - ====== WebDriver manager ======
+2025-02-25 14:52:30,493 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:52:31,473 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:52:32,466 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 14:52:32,854 - WARNING -  * Debugger is active!
+2025-02-25 14:52:32,854 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 14:52:42,249 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 14:52:42,249 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 14:52:55,539 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-25 14:53:07,759 - INFO - 📄 Scraping halaman 3 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=3
+2025-02-25 14:55:02,451 - INFO - ====== WebDriver manager ======
+2025-02-25 14:55:02,574 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:55:03,553 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:55:04,529 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 14:55:05,311 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 14:55:05,311 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 14:55:05,312 - INFO -  * Restarting with stat
+2025-02-25 14:55:06,113 - INFO - ====== WebDriver manager ======
+2025-02-25 14:55:06,239 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:55:07,250 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 14:55:08,232 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 14:55:08,677 - WARNING -  * Debugger is active!
+2025-02-25 14:55:08,678 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 14:55:13,846 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 14:55:13,846 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 14:55:26,598 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-25 15:13:19,898 - INFO - ====== WebDriver manager ======
+2025-02-25 15:13:20,033 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:20,825 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:21,805 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:13:22,625 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 15:13:22,625 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 15:13:22,626 - INFO -  * Restarting with stat
+2025-02-25 15:13:23,501 - INFO - ====== WebDriver manager ======
+2025-02-25 15:13:23,614 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:24,622 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:25,425 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:13:25,829 - WARNING -  * Debugger is active!
+2025-02-25 15:13:25,829 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 15:13:31,215 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 15:13:31,215 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 15:13:32,307 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 15:13:32,307 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 15:13:37,407 - INFO - ====== WebDriver manager ======
+2025-02-25 15:13:37,534 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:38,154 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:39,157 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:13:40,096 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 15:13:40,096 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 15:13:40,096 - INFO -  * Restarting with stat
+2025-02-25 15:13:40,966 - INFO - ====== WebDriver manager ======
+2025-02-25 15:13:41,097 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:42,080 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:13:42,864 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:13:43,220 - WARNING -  * Debugger is active!
+2025-02-25 15:13:43,220 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 15:13:48,108 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 15:13:48,108 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 15:14:03,538 - INFO - 📄 Scraping halaman 2 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-25 15:14:14,876 - INFO - 📄 Scraping halaman 3 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=3
+2025-02-25 15:14:24,920 - INFO - 📄 Scraping halaman 4 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=4
+2025-02-25 15:17:12,787 - INFO - ====== WebDriver manager ======
+2025-02-25 15:17:12,902 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:17:13,884 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:17:14,674 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:17:15,498 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 15:17:15,498 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 15:17:15,499 - INFO -  * Restarting with stat
+2025-02-25 15:17:16,417 - INFO - ====== WebDriver manager ======
+2025-02-25 15:17:16,540 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:17:17,163 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:17:17,958 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:17:18,363 - WARNING -  * Debugger is active!
+2025-02-25 15:17:18,364 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 15:17:24,385 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 15:17:24,386 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 15:17:39,425 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-x3-xdrive30i-luxury-2-0-a-110076632.htm
+2025-02-25 15:17:55,228 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:17:55,228 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/offer-local-bmw-530e-g30-m-sport-udrwarranty2026-105788992.htm
+2025-02-25 15:18:09,717 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:18:09,717 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-330i-2-0l-a-110267118.htm
+2025-02-25 15:18:23,152 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:18:23,153 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2020-bmw-118i-1-5-m-sport-a-109323174.htm
+2025-02-25 15:20:15,887 - INFO - ====== WebDriver manager ======
+2025-02-25 15:20:16,023 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:20:16,839 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:20:17,817 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:20:18,625 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 15:20:18,625 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 15:20:18,626 - INFO -  * Restarting with stat
+2025-02-25 15:20:19,442 - INFO - ====== WebDriver manager ======
+2025-02-25 15:20:19,557 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:20:20,544 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:20:21,518 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:20:21,934 - WARNING -  * Debugger is active!
+2025-02-25 15:20:21,935 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 15:20:24,603 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 15:20:24,603 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 15:20:38,056 - INFO - ✅ Ditemukan 40 listing URLs di halaman 1.
+2025-02-25 15:20:38,056 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/bmw-530e-2-0-sport-a-warranty-hybrid-108488660.htm
+2025-02-25 15:20:54,156 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:20:54,156 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2016-bmw-320i-m-sports-ckd-2-0-a-bodykit-m3-110087438.htm
+2025-02-25 15:21:10,029 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:21:10,029 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2010-bmw-x6-30d-a-xdrive-cbu-110266492.htm
+2025-02-25 15:21:24,649 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:21:24,649 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2020-bmw-118i-1-5-m-sport-a-109323174.htm
+2025-02-25 15:21:37,684 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:21:37,684 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2023-bmw-330e-2-0-m-sport-g20-facelift-u-wrnty-a-110148968.htm
+2025-02-25 15:21:52,243 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:21:52,243 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/bmw-525i-e60-2-5-a-black-sporty-collection-r2010-110268051.htm
+2025-02-25 15:22:06,707 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:22:06,707 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/facelift-bmw-528i-f10-convert-m5-low-mile-oripaint-108426277.htm
+2025-02-25 15:22:21,275 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:22:21,275 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/bmw-523i-2-5-f10-lwb-fl-g30-lci-f90-m5-competition-109427017.htm
+2025-02-25 15:22:35,309 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:22:35,309 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2018-bmw-x5-2-0-xdrive40e-m-sport-ckd-a-109685118.htm
+2025-02-25 15:22:50,990 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:22:50,991 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/mil95k-f30-promo-carking-bmw-320i-sport-line-a-109779838.htm
+2025-02-25 15:23:05,105 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:23:05,106 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/sporty-coupe-2021-bmw-420i-2-0-m-sport-japan-110268396.htm
+2025-02-25 15:23:19,202 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:23:19,202 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-x3-xdrive30i-luxury-2-0-a-110076632.htm
+2025-02-25 15:23:32,702 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:23:32,702 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2020-bmw-m135i-2-0-xdrive-m-sport-110266787.htm
+2025-02-25 15:23:47,198 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:23:47,198 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2006-bmw-523i-2-5-cbu-a-107833322.htm
+2025-02-25 15:24:01,939 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:24:01,940 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2014-bmw-320i-2-0-a-full-convert-g20-bodykit-108545036.htm
+2025-02-25 15:24:16,752 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:24:16,753 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-x3-2-0-xdrive30i-m-sport-a-fsr-110267516.htm
+2025-02-25 15:24:31,291 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:24:31,291 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-523i-2-0-m-sport-a-109763488.htm
+2025-02-25 15:24:48,014 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:24:48,014 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/bmw-528i-f10-2-0-m-sport-g30-full-bodykit-warranty-110267242.htm
+2025-02-25 15:25:02,840 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:25:02,840 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2021-bmw-530i-2-0-m-sport-a-110266835.htm
+2025-02-25 15:25:18,031 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:25:18,031 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-x3-xdrive30i-luxury-2-0-a-110251981.htm
+2025-02-25 15:25:33,143 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:25:33,143 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2020-bmw-320i-2-0-m-sport-a-109473308.htm
+2025-02-25 15:25:48,632 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:25:48,633 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-330i-2-0l-a-110267118.htm
+2025-02-25 15:26:03,325 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:26:03,325 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2015-bmw-x3-2-0-turbo-xdrive20i-lci-1yr-warranty-110267248.htm
+2025-02-25 15:26:19,096 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:26:19,097 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/offer-bmw-520i-m-performance-m5-18rim-digitalmeter-108426160.htm
+2025-02-25 15:26:35,342 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:26:35,343 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2017-bmw-x1-2-0-sdrive20i-ckd-a-110268245.htm
+2025-02-25 15:26:51,245 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:26:51,245 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/ori-2014-bmw-f26-x4-2-0-xdrive28i-a-x-line-110266852.htm
+2025-02-25 15:27:05,340 - INFO - ✅ Progress saved to storage/database/mudahmy/data-by-session-scrapping.json
+2025-02-25 15:27:05,340 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/bmw-218i-active-tourer-1-5-t-pwr-turbo-f45-f-loan-110083709.htm
+2025-02-25 15:40:31,923 - INFO - ====== WebDriver manager ======
+2025-02-25 15:40:32,044 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:40:33,218 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:40:34,211 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:40:35,014 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 15:40:35,014 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 15:40:35,015 - INFO -  * Restarting with stat
+2025-02-25 15:40:35,783 - INFO - ====== WebDriver manager ======
+2025-02-25 15:40:35,907 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:40:36,694 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 15:40:37,485 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 15:40:37,973 - WARNING -  * Debugger is active!
+2025-02-25 15:40:37,973 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 15:41:19,586 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 15:41:19,586 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 15:41:32,937 - INFO - ✅ Ditemukan 40 listing URLs di halaman 1.
+2025-02-25 15:41:32,950 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-x3-xdrive30i-luxury-2-0-a-110251981.htm
+2025-02-25 15:41:48,070 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 15:41:48,070 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2020-bmw-m135i-2-0-xdrive-m-sport-110266787.htm
+2025-02-25 15:42:02,959 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 15:42:02,959 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/facelift-bmw-528i-f10-convert-m5-low-mile-oripaint-108426277.htm
+2025-02-25 15:42:16,489 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 15:42:16,489 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/orimil-f30-1-owner-promo-bmw-320i-sports-2-0-a-109461644.htm
+2025-02-25 15:42:30,558 - INFO - 127.0.0.1 - - [25/Feb/2025 15:42:30] "[33mPOST /stop/scrape HTTP/1.1[0m" 404 -
+2025-02-25 15:42:31,634 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 15:42:31,634 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2022-bmw-218i-m-sport-gran-coupe-1-5l-a-110267452.htm
+2025-02-25 15:42:44,965 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 15:42:44,965 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2018-bmw-x5-2-0-xdrive40e-m-sport-ckd-a-108750274.htm
+2025-02-25 15:42:47,594 - INFO - 127.0.0.1 - - [25/Feb/2025 15:42:47] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-25 15:42:58,289 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 15:42:58,289 - INFO - ✅ Selesai scraping brand: bmw
+2025-02-25 15:42:58,289 - INFO - ✅ Proses scraping semua brand selesai.
+2025-02-25 15:42:58,483 - INFO - 127.0.0.1 - - [25/Feb/2025 15:42:58] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:06:30,507 - INFO - ====== WebDriver manager ======
+2025-02-25 16:06:30,629 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:06:31,832 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:06:32,814 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:06:33,723 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 16:06:33,723 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 16:06:33,724 - INFO -  * Restarting with stat
+2025-02-25 16:06:34,652 - INFO - ====== WebDriver manager ======
+2025-02-25 16:06:34,766 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:06:35,766 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:06:36,749 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:06:37,190 - WARNING -  * Debugger is active!
+2025-02-25 16:06:37,190 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:06:37,212 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 16:06:37,214 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 16:06:51,497 - INFO - ✅ Ditemukan 40 listing URLs di halaman 1.
+2025-02-25 16:06:51,497 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/bmw-523i-2-5-f10-lwb-fl-g30-lci-f90-m5-competition-109427017.htm
+2025-02-25 16:07:06,893 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 16:07:06,893 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2014-bmw-320d-sports-2-0-a-110267696.htm
+2025-02-25 16:07:21,485 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 16:07:21,485 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2020-bmw-118i-1-5-m-sport-a-109323174.htm
+2025-02-25 16:07:34,303 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 16:07:34,303 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2019-bmw-523i-2-0-m-sport-a-109763488.htm
+2025-02-25 16:07:47,332 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 16:07:47,333 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2018-bmw-x5-2-0-xdrive40e-m-sport-ckd-a-108750274.htm
+2025-02-25 16:07:49,534 - INFO - 127.0.0.1 - - [25/Feb/2025 16:07:49] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:08:00,551 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 16:08:00,551 - INFO - ✅ Selesai scraping brand: bmw
+2025-02-25 16:08:00,552 - INFO - ✅ Proses scraping semua brand selesai.
+2025-02-25 16:08:00,838 - INFO - 127.0.0.1 - - [25/Feb/2025 16:08:00] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:08:06,247 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 16:08:06,247 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 16:08:06,249 - WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7b83551b61d0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/bb131b84556688684e51d0c149574831/url
+2025-02-25 16:08:06,249 - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7b83551b6440>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/bb131b84556688684e51d0c149574831/url
+2025-02-25 16:08:06,250 - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7b83551b6980>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/bb131b84556688684e51d0c149574831/url
+2025-02-25 16:08:06,275 - INFO - 127.0.0.1 - - [25/Feb/2025 16:08:06] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-25 16:28:13,460 - INFO - ====== WebDriver manager ======
+2025-02-25 16:28:13,572 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:28:14,632 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:28:15,694 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:28:16,546 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 16:28:16,546 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 16:28:16,547 - INFO -  * Restarting with stat
+2025-02-25 16:28:17,439 - INFO - ====== WebDriver manager ======
+2025-02-25 16:28:17,567 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:28:18,634 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:28:19,308 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:28:19,749 - WARNING -  * Debugger is active!
+2025-02-25 16:28:19,749 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:28:21,578 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 16:28:21,578 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 16:28:35,292 - INFO - ✅ Ditemukan 40 listing URLs di halaman 1.
+2025-02-25 16:28:35,292 - INFO - 🔍 Mengambil detail dari https://www.mudah.my/2018-bmw-x5-2-0-xdrive40e-m-sport-ckd-a-109685118.htm
+2025-02-25 16:28:38,852 - INFO - 127.0.0.1 - - [25/Feb/2025 16:28:38] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:28:50,710 - INFO - ✅ Progress saved to storage/database/mudahmy-scrapping.json
+2025-02-25 16:28:50,710 - INFO - ✅ Selesai scraping brand: bmw
+2025-02-25 16:28:50,710 - INFO - ✅ Proses scraping semua brand selesai.
+2025-02-25 16:28:50,828 - INFO - 127.0.0.1 - - [25/Feb/2025 16:28:50] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:29:32,900 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 16:29:32,900 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 16:29:32,902 - WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ee585b60100>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/f4fb429feab127284483401dde3aa20d/url
+2025-02-25 16:29:32,903 - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ee585b60370>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/f4fb429feab127284483401dde3aa20d/url
+2025-02-25 16:29:32,904 - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ee585b608b0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/f4fb429feab127284483401dde3aa20d/url
+2025-02-25 16:29:32,951 - INFO - 127.0.0.1 - - [25/Feb/2025 16:29:32] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-25 16:39:32,581 - INFO - ====== WebDriver manager ======
+2025-02-25 16:39:32,714 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:39:33,716 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:39:34,700 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:39:35,512 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 16:39:35,513 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 16:39:35,513 - INFO -  * Restarting with stat
+2025-02-25 16:39:36,434 - INFO - ====== WebDriver manager ======
+2025-02-25 16:39:36,562 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:39:37,570 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:39:38,566 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:39:39,003 - WARNING -  * Debugger is active!
+2025-02-25 16:39:39,003 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:39:43,423 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 16:39:43,423 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 16:39:54,122 - INFO - 127.0.0.1 - - [25/Feb/2025 16:39:54] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:39:56,578 - INFO - ✅ Ditemukan 40 listing URLs di halaman 1.
+2025-02-25 16:39:56,579 - INFO - ✅ Selesai scraping brand: bmw
+2025-02-25 16:39:56,579 - INFO - ✅ Proses scraping semua brand selesai.
+2025-02-25 16:39:56,683 - INFO - 127.0.0.1 - - [25/Feb/2025 16:39:56] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-25 16:40:01,553 - INFO - 🚀 Mulai scraping brand: bmw -> https://www.mudah.my/malaysia/cars-for-sale/bmw
+2025-02-25 16:40:01,554 - INFO - 📄 Scraping halaman 1 -> https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-25 16:40:01,555 - WARNING - Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7184d83424d0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/34f82017cb814a56f72eb0a6e4046e4b/url
+2025-02-25 16:40:01,556 - WARNING - Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7184d83413f0>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/34f82017cb814a56f72eb0a6e4046e4b/url
+2025-02-25 16:40:01,556 - WARNING - Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7184d8342a10>: Failed to establish a new connection: [Errno 111] Connection refused')': /session/34f82017cb814a56f72eb0a6e4046e4b/url
+2025-02-25 16:40:01,574 - INFO - 127.0.0.1 - - [25/Feb/2025 16:40:01] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-25 16:49:48,323 - INFO -  * Detected change in '/home/fanfan/fanfan/scrap_service/mudahmy_service/mudahmy_service.py', reloading
+2025-02-25 16:49:48,509 - INFO -  * Restarting with stat
+2025-02-25 16:49:49,126 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:49:49,126 - INFO - ====== WebDriver manager ======
+2025-02-25 16:49:49,251 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:49:50,303 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:49:51,139 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:49:51,536 - WARNING -  * Debugger is active!
+2025-02-25 16:49:51,537 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:49:53,910 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:49:53,910 - INFO - ====== WebDriver manager ======
+2025-02-25 16:49:54,037 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:49:54,948 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:49:55,594 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:49:56,458 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 16:49:56,458 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 16:49:56,459 - INFO -  * Restarting with stat
+2025-02-25 16:49:57,011 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:49:57,011 - INFO - ====== WebDriver manager ======
+2025-02-25 16:49:57,136 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:49:57,771 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:49:58,804 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:49:59,376 - WARNING -  * Debugger is active!
+2025-02-25 16:49:59,376 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:49:59,689 - INFO - 127.0.0.1 - - [25/Feb/2025 16:49:59] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-25 16:51:25,299 - INFO -  * Detected change in '/home/fanfan/fanfan/scrap_service/mudahmy_service/mudahmy_service.py', reloading
+2025-02-25 16:51:25,387 - INFO -  * Restarting with stat
+2025-02-25 16:51:25,871 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:51:25,872 - INFO - ====== WebDriver manager ======
+2025-02-25 16:51:25,989 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:51:27,034 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:51:28,669 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:51:28,669 - INFO - ====== WebDriver manager ======
+2025-02-25 16:51:28,783 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:51:29,781 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:51:30,786 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:51:31,614 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 16:51:31,614 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 16:51:31,615 - INFO -  * Restarting with stat
+2025-02-25 16:51:32,121 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:51:32,121 - INFO - ====== WebDriver manager ======
+2025-02-25 16:51:32,236 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:51:33,222 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:51:34,030 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:51:34,485 - WARNING -  * Debugger is active!
+2025-02-25 16:51:34,486 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:51:34,506 - INFO - 127.0.0.1 - - [25/Feb/2025 16:51:34] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-25 16:54:24,241 - INFO -  * Detected change in '/home/fanfan/fanfan/scrap_service/mudahmy_service/app.py', reloading
+2025-02-25 16:54:24,344 - INFO -  * Restarting with stat
+2025-02-25 16:54:24,920 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:54:24,920 - INFO - ====== WebDriver manager ======
+2025-02-25 16:54:25,043 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:25,910 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:26,964 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:54:27,413 - WARNING -  * Debugger is active!
+2025-02-25 16:54:27,414 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:54:46,622 - INFO -  * Detected change in '/home/fanfan/fanfan/scrap_service/mudahmy_service/app.py', reloading
+2025-02-25 16:54:46,714 - INFO -  * Restarting with stat
+2025-02-25 16:54:47,209 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:54:47,210 - INFO - ====== WebDriver manager ======
+2025-02-25 16:54:47,323 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:49,399 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:54:49,399 - INFO - ====== WebDriver manager ======
+2025-02-25 16:54:49,516 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:50,558 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:51,575 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:54:52,406 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-25 16:54:52,406 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-25 16:54:52,407 - INFO -  * Restarting with stat
+2025-02-25 16:54:52,966 - INFO - 🔄 Memulai WebDriver baru.
+2025-02-25 16:54:52,967 - INFO - ====== WebDriver manager ======
+2025-02-25 16:54:53,090 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:53,914 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-25 16:54:54,581 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.126/chromedriver-linux64/chromedriver] found in cache
+2025-02-25 16:54:55,059 - WARNING -  * Debugger is active!
+2025-02-25 16:54:55,059 - INFO -  * Debugger PIN: 117-640-322
+2025-02-25 16:54:55,079 - INFO - 127.0.0.1 - - [25/Feb/2025 16:54:55] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-26 10:18:48,161 - INFO - ====== WebDriver manager ======
+2025-02-26 10:18:48,289 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:18:49,036 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:18:49,954 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:18:50,767 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:18:50,782 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:18:50,783 - INFO -  * Restarting with stat
+2025-02-26 10:18:51,606 - INFO - ====== WebDriver manager ======
+2025-02-26 10:18:51,724 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:18:52,647 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:18:53,383 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:18:53,733 - WARNING -  * Debugger is active!
+2025-02-26 10:18:53,733 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:19:05,503 - INFO - ====== WebDriver manager ======
+2025-02-26 10:19:05,610 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:19:06,368 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:19:07,127 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:19:14,399 - INFO - ====== WebDriver manager ======
+2025-02-26 10:19:14,520 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:19:15,283 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:19:16,200 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:19:16,981 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:19:16,981 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:19:16,982 - INFO -  * Restarting with stat
+2025-02-26 10:19:17,868 - INFO - ====== WebDriver manager ======
+2025-02-26 10:19:17,974 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:19:18,712 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:19:19,455 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:19:20,115 - WARNING -  * Debugger is active!
+2025-02-26 10:19:20,117 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:20:45,281 - INFO - 127.0.0.1 - - [26/Feb/2025 10:20:45] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-26 10:20:50,740 - INFO - 127.0.0.1 - - [26/Feb/2025 10:20:50] "[31m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 415 -
+2025-02-26 10:21:50,731 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service/app.py', reloading
+2025-02-26 10:21:50,885 - INFO -  * Restarting with stat
+2025-02-26 10:21:51,683 - INFO - ====== WebDriver manager ======
+2025-02-26 10:21:51,805 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:21:52,754 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:21:53,676 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:21:54,046 - WARNING -  * Debugger is active!
+2025-02-26 10:21:54,047 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:22:10,326 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service/app.py', reloading
+2025-02-26 10:22:10,493 - INFO -  * Restarting with stat
+2025-02-26 10:22:11,294 - INFO - ====== WebDriver manager ======
+2025-02-26 10:22:11,404 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:12,327 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:12,897 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:22:13,268 - WARNING -  * Debugger is active!
+2025-02-26 10:22:13,268 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:22:23,452 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service/app.py', reloading
+2025-02-26 10:22:23,645 - INFO -  * Restarting with stat
+2025-02-26 10:22:24,485 - INFO - ====== WebDriver manager ======
+2025-02-26 10:22:24,587 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:26,770 - INFO - ====== WebDriver manager ======
+2025-02-26 10:22:26,888 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:27,805 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:28,719 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:22:29,638 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:22:29,638 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:22:29,639 - INFO -  * Restarting with stat
+2025-02-26 10:22:30,417 - INFO - ====== WebDriver manager ======
+2025-02-26 10:22:30,539 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:31,457 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:22:32,373 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:22:32,764 - WARNING -  * Debugger is active!
+2025-02-26 10:22:32,765 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:22:37,389 - INFO - 127.0.0.1 - - [26/Feb/2025 10:22:37] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-26 10:22:42,667 - INFO - 127.0.0.1 - - [26/Feb/2025 10:22:42] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-26 10:22:45,242 - INFO - 127.0.0.1 - - [26/Feb/2025 10:22:45] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-26 10:23:28,690 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service/app.py', reloading
+2025-02-26 10:23:28,874 - INFO -  * Restarting with stat
+2025-02-26 10:23:29,672 - INFO - ====== WebDriver manager ======
+2025-02-26 10:23:29,793 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:23:32,205 - INFO - ====== WebDriver manager ======
+2025-02-26 10:23:32,331 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:23:33,252 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:23:34,167 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:23:34,970 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:23:34,970 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:23:34,971 - INFO -  * Restarting with stat
+2025-02-26 10:23:35,810 - INFO - ====== WebDriver manager ======
+2025-02-26 10:23:35,923 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:23:36,851 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:23:37,766 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:23:38,152 - WARNING -  * Debugger is active!
+2025-02-26 10:23:38,152 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:23:38,171 - INFO - 127.0.0.1 - - [26/Feb/2025 10:23:38] "POST /stop/mudahmy HTTP/1.1" 200 -
+2025-02-26 10:23:45,178 - INFO - 127.0.0.1 - - [26/Feb/2025 10:23:45] "[35m[1mPOST /scrape/mudahmy HTTP/1.1[0m" 500 -
+2025-02-26 10:35:50,775 - INFO - ====== WebDriver manager ======
+2025-02-26 10:35:50,884 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:35:51,801 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:35:52,715 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:35:53,440 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:35:53,440 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:35:53,440 - INFO -  * Restarting with stat
+2025-02-26 10:35:54,197 - INFO - ====== WebDriver manager ======
+2025-02-26 10:35:54,318 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:35:55,242 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:35:55,978 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:35:56,344 - WARNING -  * Debugger is active!
+2025-02-26 10:35:56,345 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:36:13,056 - ERROR - ❌ Error saat scraping semua brand: 'MudahMyService' object has no attribute 'reset_scraping'
+2025-02-26 10:36:13,057 - INFO - 127.0.0.1 - - [26/Feb/2025 10:36:13] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-26 10:39:14,804 - INFO - ====== WebDriver manager ======
+2025-02-26 10:39:14,918 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:39:15,841 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:39:16,761 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:39:17,520 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:39:17,520 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:39:17,520 - INFO -  * Restarting with stat
+2025-02-26 10:41:53,681 - INFO - ====== WebDriver manager ======
+2025-02-26 10:41:53,806 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:41:54,728 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:41:55,650 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:41:56,780 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:41:56,780 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:41:56,782 - INFO -  * Restarting with stat
+2025-02-26 10:41:58,414 - INFO - ====== WebDriver manager ======
+2025-02-26 10:41:58,593 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:41:59,525 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:42:00,442 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:42:00,848 - WARNING -  * Debugger is active!
+2025-02-26 10:42:00,849 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:42:04,429 - ERROR - ❌ Error saat scraping semua brand: 'MudahMyService' object has no attribute 'reset_scraping'
+2025-02-26 10:42:04,429 - INFO - 127.0.0.1 - - [26/Feb/2025 10:42:04] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-26 10:42:57,768 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service/app.py', reloading
+2025-02-26 10:42:57,952 - INFO -  * Restarting with stat
+2025-02-26 10:44:24,206 - INFO - ====== WebDriver manager ======
+2025-02-26 10:44:24,318 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:44:25,238 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:44:26,149 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:44:26,903 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:44:26,903 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:44:26,903 - INFO -  * Restarting with stat
+2025-02-26 10:44:27,703 - INFO - ====== WebDriver manager ======
+2025-02-26 10:44:27,827 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:44:28,749 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:44:29,497 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:44:29,890 - WARNING -  * Debugger is active!
+2025-02-26 10:44:29,891 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:44:30,527 - INFO - 🔄 Scraping direset dan siap dimulai kembali.
+2025-02-26 10:44:30,531 - INFO - 🚀 Mulai scraping brand: bmw
+2025-02-26 10:44:30,531 - INFO - 📄 Scraping halaman 1: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-26 10:44:30,531 - INFO - 📄 Mengambil listing dari: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-26 10:44:39,902 - INFO - ✅ Ditemukan 40 listing URLs.
+2025-02-26 10:44:39,902 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2022-bmw-x1-sdrive20i-m-sport-2-0l-a-109191221.htm
+2025-02-26 10:44:48,338 - ERROR - ❌ Error saat scraping semua brand: Invalid syntax for pseudo class ':nth-child'
+  line 1:
+#ad_view_car_specifications > div > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div:nth-child(3
+                                                                                                     ^
+2025-02-26 10:44:48,339 - INFO - 127.0.0.1 - - [26/Feb/2025 10:44:48] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-02-26 10:47:44,290 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service/mudahmy_service.py', reloading
+2025-02-26 10:47:44,452 - INFO -  * Restarting with stat
+2025-02-26 10:47:45,302 - INFO - ====== WebDriver manager ======
+2025-02-26 10:47:45,442 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:48:17,859 - INFO - ====== WebDriver manager ======
+2025-02-26 10:48:17,984 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:48:18,903 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:48:19,826 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:48:20,743 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:48:20,743 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:48:20,744 - INFO -  * Restarting with stat
+2025-02-26 10:48:21,492 - INFO - ====== WebDriver manager ======
+2025-02-26 10:48:21,599 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:48:22,523 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:48:23,438 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:48:23,796 - WARNING -  * Debugger is active!
+2025-02-26 10:48:23,796 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:51:01,614 - INFO - 🔄 Scraping direset dan siap dimulai kembali.
+2025-02-26 10:51:01,618 - INFO - 🚀 Mulai scraping brand: bmw
+2025-02-26 10:51:01,618 - INFO - 📄 Scraping halaman 1: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-26 10:51:01,619 - INFO - 📄 Mengambil listing dari: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-26 10:51:39,420 - INFO - ✅ Ditemukan 40 listing URLs.
+2025-02-26 10:51:39,420 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/genuine-2014-bmw-x1-2-0-sdrive20i-facelift-109599115.htm
+2025-02-26 10:51:47,254 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-328i-m-sport-ckd-2-0-a-110276604.htm
+2025-02-26 10:51:54,678 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-x5-xdrive45e-3-0-f-servrec-applecarplay-20-rim-110276815.htm
+2025-02-26 10:52:01,647 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-530e-2-0-m-sport-a-48k-km-full-service-107017919.htm
+2025-02-26 10:52:07,514 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x5-xdrive45e-3-0-m-sport-h-kardon-f-serv-110277507.htm
+2025-02-26 10:52:13,924 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-330i-2-0-m-sport-a-fsr-and-raya-offer-110277078.htm
+2025-02-26 10:52:21,683 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2024-bmw-320i-m-sport-lci-demo-unit-109876559.htm
+2025-02-26 10:52:28,990 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-530i-2-0-m-sport-a-warranty-end-2026-110276879.htm
+2025-02-26 10:52:36,371 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2020-bmw-x3-xdrive30i-2-0l-under-warranty-f-loan-108641887.htm
+2025-02-26 10:52:44,470 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/ori-2014-bmw-x1-2-0-xdrive20d-a-turbo-diesel-108783887.htm
+2025-02-26 10:52:53,014 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-116i-a-fulloan-blacklist-low-mileage-tip-top-108756741.htm
+2025-02-26 10:53:00,648 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2018-bmw-330e-2-0-m-sport-facelift-a-108191387.htm
+2025-02-26 10:53:08,853 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2001-bmw-318ci-cbu-2-0-a-110276924.htm
+2025-02-26 10:53:15,770 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-320i-g20-sport-2-0l-a-fsr-70k-km-wrty-2026-109821670.htm
+2025-02-26 10:53:22,240 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2016-bmw-x4-2-0-xdrive28i-full-loan-free-warranty-110276889.htm
+2025-02-26 10:53:29,571 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2010-bmw-323i-ckd-2-5-facelift-a-110278108.htm
+2025-02-26 10:53:35,787 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-520i-2-0-facelift-lci-a-m-sport-bodykit-108339755.htm
+2025-02-26 10:53:42,637 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-530e-2-0-sport-a-full-service-warranty-110277530.htm
+2025-02-26 10:53:50,652 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x5-xdrive40i-m-sport-warranty-bmw-f-loan-110233271.htm
+2025-02-26 10:53:57,496 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/promo-bmw-320i-2-0-sport-warrnty-til-2025-ful-loan-109514544.htm
+2025-02-26 10:54:04,630 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/1999-bmw-328ci-cbu-2-8-a-110249088.htm
+2025-02-26 10:54:11,485 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-320i-sport-with-da-low-mileage-110276267.htm
+2025-02-26 10:54:17,815 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/promo-bmw-x5-2-0-xdrive40e-m-sport-mil-82k-f-loan-109514394.htm
+2025-02-26 10:54:23,979 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-x3-2-0-xdrive30i-luxury-a-one-owner-109126022.htm
+2025-02-26 10:54:30,407 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-m135i-2-0-xdrive-a-110276313.htm
+2025-02-26 10:54:36,873 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-x5-3-0-xdrive45e-m-sport-a-f-service-bmwaranty-110013710.htm
+2025-02-26 10:54:43,091 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/offer-bmw-x5-xdrive45e-3-0-memoryseat-360cam-lowmi-110277208.htm
+2025-02-26 10:54:49,618 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2008-bmw-x6-630ci-cbu-3-5-a-110277072.htm
+2025-02-26 10:54:56,101 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2012-bmw-740li-cbu-3-0-a-110277952.htm
+2025-02-26 10:55:02,880 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2017-bmw-530i-2-0-m-sport-a-car-king-full-loan-110257218.htm
+2025-02-26 10:55:09,230 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-x3-2-0-xdrive30i-a-full-loan-cash-back-110141977.htm
+2025-02-26 10:55:16,018 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x5-xdrive45e-3-0-h-kardon-p-boot-oripaint-110276747.htm
+2025-02-26 10:55:22,344 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2018-bmw-530e-2-0-sport-58k-km-autobavaria-record-109993960.htm
+2025-02-26 10:55:28,962 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2024-bmw-218i-gran-coupe-m-sport-2024-109277052.htm
+2025-02-26 10:55:35,026 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2010-bmw-x6-3-0-xdrive35i-cbu-a-110275951.htm
+2025-02-26 10:55:41,365 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/otr-bmw-x1-2-0-sdrive20i-f48-new-model-cbu-8sp-108349428.htm
+2025-02-26 10:55:48,122 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x1-sdrive20i-m-sport-2-0l-a-full-service-104252588.htm
+2025-02-26 10:55:55,001 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-530e-2-0-m-sport-a-f-s-record-110277518.htm
+2025-02-26 10:56:01,447 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2018-bmw-x2-2-0-sdrive20i-cbu-a-109092111.htm
+2025-02-26 10:56:07,978 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2022-bmw-x1-sdrive20i-m-sport-2-0l-a-109191221.htm
+2025-02-26 10:56:13,796 - INFO - 📄 Scraping halaman 2: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-26 10:56:13,796 - INFO - 📄 Mengambil listing dari: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-26 10:56:20,568 - INFO - ✅ Ditemukan 40 listing URLs.
+2025-02-26 10:56:20,569 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-2020-bmw-530i-2-0-m-sport-ckd-a-109547672.htm
+2025-02-26 10:56:26,788 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2010-bmw-523i-2-5-ckd-a-110275931.htm
+2025-02-26 10:56:33,515 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-x1-2-0-sdrive20i-ckd-facelift-a-110274633.htm
+2025-02-26 10:56:40,180 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2015-bmw-730ld-g12-3-0-b57-engine-110275324.htm
+2025-02-26 10:56:47,005 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2016-bmw-528i-2-0-m-performance-facelift-my2016-110055313.htm
+2025-02-26 10:56:53,008 - INFO - ====== WebDriver manager ======
+2025-02-26 10:56:53,130 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:56:54,052 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:56:54,794 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:56:55,668 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.2.0.2:5001
+2025-02-26 10:56:55,668 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 10:56:55,669 - INFO -  * Restarting with stat
+2025-02-26 10:56:56,435 - INFO - ====== WebDriver manager ======
+2025-02-26 10:56:56,547 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:56:57,467 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 10:56:58,379 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 10:56:58,788 - WARNING -  * Debugger is active!
+2025-02-26 10:56:58,788 - INFO -  * Debugger PIN: 724-154-095
+2025-02-26 10:57:58,168 - INFO - 🔄 Scraping direset dan siap dimulai kembali.
+2025-02-26 10:57:58,172 - INFO - 🚀 Mulai scraping brand: bmw
+2025-02-26 10:57:58,172 - INFO - 📄 Scraping halaman 1: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-26 10:57:58,172 - INFO - 📄 Mengambil listing dari: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=1
+2025-02-26 10:58:07,779 - INFO - ✅ Ditemukan 40 listing URLs.
+2025-02-26 10:58:07,779 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2018-bmw-530e-2-0-sport-58k-km-autobavaria-record-109993960.htm
+2025-02-26 10:58:14,434 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-530e-2-0-m-sport-a-f-s-record-110277518.htm
+2025-02-26 10:58:46,922 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2016-bmw-x4-2-0-xdrive28i-full-loan-free-warranty-110276889.htm
+2025-02-26 10:58:52,936 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2020-bmw-x3-xdrive30i-2-0l-under-warranty-f-loan-108641887.htm
+2025-02-26 10:58:58,462 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2018-bmw-330e-2-0-m-sport-facelift-a-108191387.htm
+2025-02-26 10:59:04,195 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-x3-2-0-xdrive30i-luxury-a-one-owner-109126022.htm
+2025-02-26 10:59:10,757 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-320i-g20-sport-2-0l-a-fsr-70k-km-wrty-2026-109821670.htm
+2025-02-26 10:59:17,193 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-530e-2-0-sport-a-full-service-warranty-110277530.htm
+2025-02-26 10:59:23,414 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-530e-2-0-m-sport-a-48k-km-full-service-107017919.htm
+2025-02-26 10:59:29,228 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x5-xdrive45e-3-0-h-kardon-p-boot-oripaint-110276747.htm
+2025-02-26 10:59:35,133 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/otr-bmw-x1-2-0-sdrive20i-f48-new-model-cbu-8sp-108349428.htm
+2025-02-26 10:59:40,983 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-m135i-2-0-xdrive-a-110276313.htm
+2025-02-26 10:59:46,923 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2024-bmw-320i-m-sport-lci-demo-unit-109876559.htm
+2025-02-26 10:59:52,777 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2017-bmw-530i-2-0-m-sport-a-car-king-full-loan-110257218.htm
+2025-02-26 10:59:59,017 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-520i-2-0-facelift-lci-a-m-sport-bodykit-108339755.htm
+2025-02-26 11:00:04,697 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2024-bmw-218i-gran-coupe-m-sport-2024-109277052.htm
+2025-02-26 11:00:11,400 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-330i-2-0-m-sport-a-fsr-and-raya-offer-110277078.htm
+2025-02-26 11:00:17,632 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-320i-sport-with-da-low-mileage-110276267.htm
+2025-02-26 11:00:23,415 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-530i-2-0-m-sport-a-warranty-end-2026-110276879.htm
+2025-02-26 11:00:29,138 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-x5-3-0-xdrive45e-m-sport-a-f-service-bmwaranty-110013710.htm
+2025-02-26 11:00:34,865 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/promo-bmw-320i-2-0-sport-warrnty-til-2025-ful-loan-109514544.htm
+2025-02-26 11:00:40,541 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/promo-bmw-x5-2-0-xdrive40e-m-sport-mil-82k-f-loan-109514394.htm
+2025-02-26 11:00:46,237 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-116i-a-fulloan-blacklist-low-mileage-tip-top-108756741.htm
+2025-02-26 11:00:51,995 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2018-bmw-x2-2-0-sdrive20i-cbu-a-109092111.htm
+2025-02-26 11:00:57,821 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/genuine-2014-bmw-x1-2-0-sdrive20i-facelift-109599115.htm
+2025-02-26 11:01:03,562 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/ori-2014-bmw-x1-2-0-xdrive20d-a-turbo-diesel-108783887.htm
+2025-02-26 11:01:09,872 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x5-xdrive45e-3-0-m-sport-h-kardon-f-serv-110277507.htm
+2025-02-26 11:01:15,709 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2022-bmw-x1-sdrive20i-m-sport-2-0l-a-109191221.htm
+2025-02-26 11:01:21,400 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2010-bmw-x6-3-0-xdrive35i-cbu-a-110275951.htm
+2025-02-26 11:01:27,319 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/1999-bmw-328ci-cbu-2-8-a-110249088.htm
+2025-02-26 11:01:33,247 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-x3-2-0-xdrive30i-a-full-loan-cash-back-110141977.htm
+2025-02-26 11:01:39,333 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-328i-m-sport-ckd-2-0-a-110276604.htm
+2025-02-26 11:01:45,003 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2001-bmw-318ci-cbu-2-0-a-110276924.htm
+2025-02-26 11:01:51,004 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/offer-bmw-x5-xdrive45e-3-0-memoryseat-360cam-lowmi-110277208.htm
+2025-02-26 11:01:56,840 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2010-bmw-323i-ckd-2-5-facelift-a-110278108.htm
+2025-02-26 11:02:02,987 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-x5-xdrive45e-3-0-f-servrec-applecarplay-20-rim-110276815.htm
+2025-02-26 11:02:09,142 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2008-bmw-x6-630ci-cbu-3-5-a-110277072.htm
+2025-02-26 11:02:14,909 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x1-sdrive20i-m-sport-2-0l-a-full-service-104252588.htm
+2025-02-26 11:02:21,279 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2012-bmw-740li-cbu-3-0-a-110277952.htm
+2025-02-26 11:02:26,930 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2021-bmw-x5-xdrive40i-m-sport-warranty-bmw-f-loan-110233271.htm
+2025-02-26 11:02:32,793 - INFO - 📄 Scraping halaman 2: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-26 11:02:32,794 - INFO - 📄 Mengambil listing dari: https://www.mudah.my/malaysia/cars-for-sale/bmw?o=2
+2025-02-26 11:02:39,757 - INFO - ✅ Ditemukan 40 listing URLs.
+2025-02-26 11:02:39,757 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-318i-e46-2-0-a-handsome-car-fast-delivery-107434631.htm
+2025-02-26 11:02:46,434 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2020-bmw-x3-xdrive30i-2-0l-under-warranty-f-loan-108641887.htm
+2025-02-26 11:02:52,143 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-520i-2-0-a-109645919.htm
+2025-02-26 11:02:58,369 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2016-bmw-528i-2-0-m-performance-facelift-my2016-110055313.htm
+2025-02-26 11:03:04,877 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/bmw-330e-m-sport-110247962.htm
+2025-02-26 11:03:10,466 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-x3-2-0-xdrive30i-luxury-a-one-owner-109126022.htm
+2025-02-26 11:03:16,709 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2019-bmw-740le-xdrive-2-0-a-services-record-19-110274825.htm
+2025-02-26 11:03:23,500 - INFO - 🔍 Mengambil detail dari: https://www.mudah.my/2013-bmw-740li-cbu-3-0-facelift-a-110275338.htm
+2025-02-26 17:10:52,374 - INFO - ====== WebDriver manager ======
+2025-02-26 17:10:52,491 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:10:52,572 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:10:52,644 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 17:10:53,036 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.7:5001
+2025-02-26 17:10:53,036 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 17:10:53,036 - INFO -  * Restarting with stat
+2025-02-26 17:10:53,787 - INFO - ====== WebDriver manager ======
+2025-02-26 17:10:53,912 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:10:53,997 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:10:54,064 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 17:10:54,432 - WARNING -  * Debugger is active!
+2025-02-26 17:10:54,433 - INFO -  * Debugger PIN: 114-253-301
+2025-02-26 17:53:19,810 - INFO - ====== WebDriver manager ======
+2025-02-26 17:53:19,923 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:53:20,017 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:53:20,088 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 17:53:20,450 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://192.168.1.7:5001
+2025-02-26 17:53:20,450 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-26 17:53:20,451 - INFO -  * Restarting with stat
+2025-02-26 17:53:21,232 - INFO - ====== WebDriver manager ======
+2025-02-26 17:53:21,359 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:53:21,434 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-26 17:53:21,501 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-26 17:53:21,884 - WARNING -  * Debugger is active!
+2025-02-26 17:53:21,885 - INFO -  * Debugger PIN: 114-253-301
