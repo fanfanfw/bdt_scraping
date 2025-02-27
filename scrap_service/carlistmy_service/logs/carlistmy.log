@@ -423,3 +423,138 @@ LINE 4: ...pdated on: February 25, 2025', 'Selangor Cheras', 'RM 109,90...
 2025-02-26 10:27:21,372 - INFO - 🚀 Mulai scraping brand: honda
 2025-02-26 10:27:21,373 - INFO - 📄 Scraping halaman 1: https://www.carlist.my/used-cars-for-sale/honda/malaysia?page_size=25&page_number=1
 2025-02-26 10:27:21,373 - INFO - 📄 Mengambil listing dari: https://www.carlist.my/used-cars-for-sale/honda/malaysia?page_size=25&page_number=1
+2025-02-27 09:04:21,625 - INFO - ====== WebDriver manager ======
+2025-02-27 09:04:21,768 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:04:21,853 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:04:21,930 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:04:22,194 - INFO - WebDriver version 133.0.6943.141 selected
+2025-02-27 09:04:22,199 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.141/linux64/chromedriver-linux64.zip
+2025-02-27 09:04:22,199 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.141/linux64/chromedriver-linux64.zip
+2025-02-27 09:04:22,318 - INFO - Driver downloading response is 200
+2025-02-27 09:04:25,659 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:04:25,904 - INFO - Driver has been saved in cache [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141]
+2025-02-27 09:04:26,494 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.1.7:5002
+2025-02-27 09:04:26,494 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-27 09:04:26,502 - INFO -  * Restarting with stat
+2025-02-27 09:04:27,290 - INFO - ====== WebDriver manager ======
+2025-02-27 09:04:27,416 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:04:27,495 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:04:27,571 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-27 09:04:27,941 - WARNING -  * Debugger is active!
+2025-02-27 09:04:27,942 - INFO -  * Debugger PIN: 139-730-434
+2025-02-27 09:05:10,777 - INFO - 🔄 Scraping direset dan siap dimulai kembali.
+2025-02-27 09:05:10,794 - INFO - 🚀 Mulai scraping brand: bmw
+2025-02-27 09:05:10,794 - INFO - 📄 Scraping halaman 1: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=1
+2025-02-27 09:05:10,794 - INFO - 📄 Mengambil listing dari: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=1
+2025-02-27 09:05:20,522 - INFO - ✅ Ditemukan 25 listing URLs.
+2025-02-27 09:05:20,522 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-ix-xdrive40-suv/16051669
+2025-02-27 09:05:25,555 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-320i-2-0-sport-driving-assist-pack-sedan/16487412
+2025-02-27 09:05:30,825 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2018-bmw-330e-2-0-m-sport-sedan/16396029
+2025-02-27 09:05:36,455 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-bmw-x3-2-0-xdrive30i-m-sport-suv/15832863
+2025-02-27 09:05:43,550 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-520i-2-0-sedan-ori-cond-1-owner-m-sport-bodykit-smooth-perfomance-full-black-leather-sport-steering-high-loan-low-depo-1yr-warranty/15940092
+2025-02-27 09:05:48,784 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2013-bmw-740li-3-0-sedan-2-digit-plate-number/16491008
+2025-02-27 09:05:54,227 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2016-bmw-x1-2-0-sdrive20i-suv-a-no-processing-charge/13565317
+2025-02-27 09:05:59,906 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-330e-2-0-m-sport-full-service-record-f30-paddleshifters-sedan/15466220
+2025-02-27 09:06:05,257 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-x1-2-0-suv/16370445?carsome=true
+2025-02-27 09:06:11,665 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2023-bmw-330e-2-0-m-sport-sedan/16453852
+2025-02-27 09:06:18,491 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/december-2019-bmw-x1-2-0-sdrive20i-a-f48-petrol-twin-power-turbo-7-dct-high-spec-ckd-local-brand-new-by-bmw-malaysia-1-doctor-owner/15854127
+2025-02-27 09:06:24,005 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2012-bmw-530i-3-0-m-sport-sedan/15911915
+2025-02-27 09:06:29,828 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-318i-1-5-luxury-sedan-leather-seat-like-new-loan-kedai-ic-sahaja/16485257
+2025-02-27 09:06:35,773 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/owner-2013-bmw-528i-2-0-m-sport-sedan/16459013
+2025-02-27 09:06:41,526 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-530i-2-0-m-sport-sedan/15159319
+2025-02-27 09:06:48,407 - INFO - ====== WebDriver manager ======
+2025-02-27 09:06:48,531 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:06:48,642 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:06:48,762 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-27 09:06:49,195 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.1.7:5002
+2025-02-27 09:06:49,195 - INFO - [33mPress CTRL+C to quit[0m
+2025-02-27 09:06:49,195 - INFO -  * Restarting with stat
+2025-02-27 09:06:50,029 - INFO - ====== WebDriver manager ======
+2025-02-27 09:06:50,148 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:06:50,228 - INFO - Get LATEST chromedriver version for google-chrome
+2025-02-27 09:06:50,340 - INFO - Driver [/home/fanfan/.wdm/drivers/chromedriver/linux64/133.0.6943.141/chromedriver-linux64/chromedriver] found in cache
+2025-02-27 09:06:50,797 - WARNING -  * Debugger is active!
+2025-02-27 09:06:50,798 - INFO -  * Debugger PIN: 139-730-434
+2025-02-27 09:07:40,202 - INFO - 🔄 Scraping direset dan siap dimulai kembali.
+2025-02-27 09:07:40,205 - INFO - 🚀 Mulai scraping brand: bmw
+2025-02-27 09:07:40,205 - INFO - 📄 Scraping halaman 1: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=1
+2025-02-27 09:07:40,205 - INFO - 📄 Mengambil listing dari: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=1
+2025-02-27 09:07:48,267 - INFO - ✅ Ditemukan 25 listing URLs.
+2025-02-27 09:07:48,267 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2012-bmw-530i-3-0-m-sport-sedan/15911915
+2025-02-27 09:07:54,284 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-x5-2-0-xdrive40e-m-sport-free-hybrid-warranty/15785054
+2025-02-27 09:07:59,760 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-318i-1-5-luxury-sedan-leather-seat-like-new-loan-kedai-ic-sahaja/16485257
+2025-02-27 09:08:05,313 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-ix-xdrive40-suv/16051669
+2025-02-27 09:08:10,237 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-x4-2-0-xdrive30i-m-sport-driving-assist-pack-a-bmw-premium-selection/16500738
+2025-02-27 09:08:16,101 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2016-bmw-x1-2-0-sdrive20i-suv-a-no-processing-charge/13565317
+2025-02-27 09:08:21,478 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-bmw-x3-2-0-xdrive30i-m-sport-suv/15832863
+2025-02-27 09:08:26,626 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-520i-2-0-sedan-ori-cond-1-owner-m-sport-bodykit-smooth-perfomance-full-black-leather-sport-steering-high-loan-low-depo-1yr-warranty/15940092
+2025-02-27 09:08:32,427 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/owner-2013-bmw-528i-2-0-m-sport-sedan/16459013
+2025-02-27 09:08:37,236 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-x1-2-0-suv/16370445?carsome=true
+2025-02-27 09:08:42,204 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/march-2022-bmw-x1-sdrive20i-a-f48-2-0i-petrol-twin-power-turbo-lci-new-facelift-original-m-sport-7-dct-high-spec-ckd-local-brand-new-by-bmw-malay/16331397
+2025-02-27 09:08:47,868 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/december-2019-bmw-x1-2-0-sdrive20i-a-f48-petrol-twin-power-turbo-7-dct-high-spec-ckd-local-brand-new-by-bmw-malaysia-1-doctor-owner/15854127
+2025-02-27 09:08:52,931 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-530i-2-0-m-sport-sedan/15159319
+2025-02-27 09:08:57,871 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-bmw-740le-2-0-xdrive-sedan/16500753
+2025-02-27 09:09:04,835 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/february-2017-bmw-x5-xdrive40e-a-f15-local-original-m-sport-petrol-model-plug-in-hybrid-twin-power-turbo-brand-by-bmw-malaysia-car-king-64k-km/16417690
+2025-02-27 09:09:10,195 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2023-bmw-330e-2-0-m-sport-sedan/16453852
+2025-02-27 09:09:15,409 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-x5-2-0-xdrive40e-m-sport-suv-full-service-record-79k-with-1-year-warranty/16472221
+2025-02-27 09:09:20,929 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-330e-2-0-m-sport-full-service-record-f30-paddleshifters-sedan/15466220
+2025-02-27 09:09:26,495 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2013-bmw-740li-3-0-sedan-2-digit-plate-number/16491008
+2025-02-27 09:09:31,728 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2020-bmw-530i-2-0-m-sport-sedan/16430854
+2025-02-27 09:09:37,464 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-320i-2-0-m-sport-sedan/16481568
+2025-02-27 09:09:43,253 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-320i-2-0-sport-driving-assist-pack-sedan/16487412
+2025-02-27 09:09:48,196 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2013-bmw-328i-2-0-m-sport-f30-3-series-twin-power-turbo-sedan/16056924
+2025-02-27 09:09:53,286 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2018-bmw-330e-2-0-m-sport-sedan/16396029
+2025-02-27 09:09:59,287 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2020-bmw-320i-2-0-sport-driving-assist-pack-sedan/16386294
+2025-02-27 09:10:05,269 - INFO - 📄 Scraping halaman 2: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=2
+2025-02-27 09:10:05,269 - INFO - 📄 Mengambil listing dari: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=2
+2025-02-27 09:10:12,799 - INFO - ✅ Ditemukan 25 listing URLs.
+2025-02-27 09:10:12,799 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-x6-3-0-xdrive40i-m-sport-suv-a-3-years-warranty-guarantee-no-accident-no-total-lost-no-flood-5-days-money-back-guarantee/11856194
+2025-02-27 09:10:20,949 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2013-bmw-f30-328i-sport-line-2-0-at-full-convert-m-sport-bodykit-m-sport-steering-wheel-red-leather-interior/16422948
+2025-02-27 09:10:27,268 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2014-bmw-320d-2-0-m-sport-a-high-loan-cash-back-free-3-months-5-days-money-back-guarantee/15098932
+2025-02-27 09:10:34,818 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-sime-darby-bmw-x1-1-5-sdrive18i-suv-trusted-dealer/16491573
+2025-02-27 09:10:40,394 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-630i-2-0-gt-m-sport-a-bmw-premium-selection/15989063
+2025-02-27 09:10:46,120 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-328i-2-0-a-guarantee-no-accident-no-total-lost-no-flood-5-day-money-back-guarantee-cash-back-high-loan-3-months-installment-free-cash-back/12807020
+2025-02-27 09:10:52,302 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-330e-2-0-m-sport-edition-1-owner-come-with-new-model-b48-engine-bmw-full-service-record/9961342
+2025-02-27 09:10:58,063 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2010-bmw-320i-ckd-2-0-facelift-a-one-owner-full-leather-seat/14240745
+2025-02-27 09:11:03,592 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-320i-2-0-m3-fully-bodykit-with-on-time-service-original-condition-owner-convert-m-sport-edition-steering-come-with-paddle-shift/13612577
+2025-02-27 09:11:08,701 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-218i-1-5-coupe/16293933?carsome=true
+2025-02-27 09:11:14,296 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2018-bmw-x5-2-0l-xdrive40e-m-sport-suv-auto-power-boot-panoramic-roof-harmon-kardon-surround-sound-system/16079566
+2025-02-27 09:11:20,133 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2017-bmw-x5-2-0-xdrive40e-m-sport-paddle-shift-power-boot-sunroof-suv/16499794
+2025-02-27 09:11:28,725 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2020-bmw-x5-3-0-xdrive45e-m-sport-suv-under-free-service-and-8-years-bmw-warranty/15980924
+2025-02-27 09:11:34,512 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-320i-2-0-sports-sedan-a-one-owner-tiptop-condition-full-leather-seat/14032328
+2025-02-27 09:11:40,008 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2015-bmw-x5-3-0-xdrive35i-facelift-rare-edition-unit-fully-petrol-non-hybrid-and-1-owner-only/15271186
+2025-02-27 09:11:46,609 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2018-bmw-530e-2-0l-sport-line-iperformance-sedan-auto/16079597
+2025-02-27 09:11:52,677 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2013-bmw-520i/13566886?bmw=true
+2025-02-27 09:11:58,053 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-x5-2-0-xdrive40e-m-sport-1-owner-performance-spec-come-with-harman-kardon-speaker-headup-display-fully-skirting-3-driving-mode/16419633
+2025-02-27 09:12:03,647 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-bmw-330i-2-0-m-sport-sedan-with-full-service-history-bmw/15502239
+2025-02-27 09:12:09,638 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2013-bmw-316i-1-6-sedan-reg-2014/15919324
+2025-02-27 09:12:15,475 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2024-bmw-x4-2-0-xdrive30i-m-sport-suv/14330297
+2025-02-27 09:12:20,975 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-x3-2-0-xdrive30i-m-sport-a-under-warranty-guarantee-no-accident-no-total-lost-no-flood-5-day-money-back-guarantee/15098669
+2025-02-27 09:12:26,706 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-sime-darby-bmw-x4-2-0-xdrive30i-m-sport-suv-sime-trusted-dealer/16096895
+2025-02-27 09:12:34,158 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-x5-3-0-xdrive45e-m-performance-bmw-full-service-record-under-bmw-warranty-like-new-car/15671977
+2025-02-27 09:12:39,832 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-bmw-520i/12108594?bmw=true
+2025-02-27 09:12:45,473 - INFO - 📄 Scraping halaman 3: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=3
+2025-02-27 09:12:45,473 - INFO - 📄 Mengambil listing dari: https://www.carlist.my/used-cars-for-sale/bmw/malaysia?page_size=25&page_number=3
+2025-02-27 09:12:55,900 - INFO - ✅ Ditemukan 25 listing URLs.
+2025-02-27 09:12:55,901 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-330i-2-0-m-sport-m-performance-fullbodykit-fullservicerecord-akrapovicvalvetronicexhaust-newdragonscaletaillight-19inch-varro-sportrim-1owner/16388314
+2025-02-27 09:13:02,014 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2024-bmw-x3-2-0-xdrive30i-m-sport-suv-with-demo-unit/16323874
+2025-02-27 09:13:08,108 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2024-bmw-i4-0-0-edrive35-a-bmw-premium-selection/15468709
+2025-02-27 09:13:14,318 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-x1-1-5-sdrive18i-suv/16462274
+2025-02-27 09:13:20,708 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/bmw-x3-2-0-xdrive30i-m-sport-g01-facelift-local-fullbodykit-reversecam-digitalmeter-sportmode-paddleshift-powerboot-electricletherseat-lowmil-oripaint/16464656
+2025-02-27 09:13:26,272 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2023-bmw-ix-0-0-xdrive40-suv-very-low-mileage-like-new/16476298
+2025-02-27 09:13:32,375 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2023-bmw-ix-0-0-suv/16392089?carsome=true
+2025-02-27 09:13:37,768 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-x7-3-0-xdrive40i-m-sport-suv/14599723
+2025-02-27 09:13:43,576 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2020-bmw-x5-3-0-xdrive45e-m-sport-suv-under-free-service-and-8-years-bmw-warranty/15980924
+2025-02-27 09:13:48,882 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2021-bmw-530e-2-0-m-sport-sedan-34k-km-bmw-warranty-till-2029/16239720
+2025-02-27 09:13:54,516 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2022-bmw-330i-2-0-m-sport-high-spec-a/15165538
+2025-02-27 09:14:00,489 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2019-bmw-330i-2-0-m-sport-sedan-with-full-service-history-bmw/15502239
+2025-02-27 09:14:05,832 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2018-bmw-x5-2-0-xdrive40e-m-sport-m-performance-fullbodykit-f15-fullspec-local-panaromicroof-f-service-harmankardon-pushstart-360cam-powerboot-head-up/14824290
+2025-02-27 09:14:11,917 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2016-bmw-520i-2-0-m-sport-facelift-local-converted-g30-m5-bodykit-sport-digitalmeter-reversecam-newmodelsteering-18inch-m-sportrim-1owner-lowmileage/15510683
+2025-02-27 09:14:17,961 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2020-bmw-x5-3-0-xdrive45e-m-sport-suv/16484723
+2025-02-27 09:14:23,726 - INFO - 🔍 Mengambil detail dari: https://www.carlist.my/used-cars/2024-bmw-i5-0-0-edrive40-m-sport-sedan/15728126
