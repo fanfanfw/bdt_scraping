@@ -4,3 +4,5 @@ myenv
 
 scrap_service/carlistmy_service/.env
 scrap_service/mudahmy_service/.env
+
+__pycache__
