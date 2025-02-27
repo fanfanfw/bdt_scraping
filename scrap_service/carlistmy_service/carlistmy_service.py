@@ -14,7 +14,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from .database import get_connection
 
 logging.basicConfig(
-    filename="scrap_service/carlistmy_service/logs/carlistmy.log",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
@@ -76,6 +75,7 @@ class CarlistMyService:
         variant = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(5) > a > span")
 
         informasi_iklan = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--masthead.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-2\\@mobile > div > div > div:nth-child(1) > span.u-color-muted.u-text-7.u-hide\@mobile")
+        
         lokasi_part1 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
         lokasi_part2 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
         lokasi = " ".join(filter(None, [lokasi_part1, lokasi_part2]))
@@ -112,41 +112,44 @@ class CarlistMyService:
         }
         return detail
 
-    def scrape_all_brands(self):
-        """Scrape semua brand berdasarkan file CSV."""
+    def scrape_all_brands(self, start_brand=None, start_page=1):
+        """Scrape semua brand berdasarkan file CSV dengan opsi untuk melanjutkan dari titik tertentu."""
         try:
             self.reset_scraping()
             df = pd.read_csv(INPUT_FILE)
-
-            while not self.stop_flag:
-                for _, row in df.iterrows():
-                    if self.stop_flag:
+            start_scraping = False if start_brand else True
+            
+            for _, row in df.iterrows():
+                brand = row["brand"]
+                base_brand_url = row["url"]
+                
+                if not start_scraping:
+                    if brand == start_brand:
+                        start_scraping = True
+                    else:
+                        continue  # Lewati sampai menemukan brand yang sesuai
+                
+                logging.info(f"🚀 Mulai scraping brand: {brand}")
+                page_number = start_page if brand == start_brand else 1
+                
+                while not self.stop_flag:
+                    paginated_url = re.sub(r"(page_number=)\d+", lambda m: m.group(1) + str(page_number), base_brand_url)
+                    logging.info(f"📄 Scraping halaman {page_number}: {paginated_url}")
+                    
+                    listing_urls = self.get_listing_urls(paginated_url)
+                    if not listing_urls:
+                        logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
                         break
                     
-                    brand = row["brand"]
-                    logging.info(f"🚀 Mulai scraping brand: {brand}")
-                    
-                    base_brand_url = row["url"]
-                    page_number = 1
-                    
-                    while not self.stop_flag:
-                        paginated_url = re.sub(r"(page_number=)\d+", lambda m: m.group(1) + str(page_number), base_brand_url)
-                        logging.info(f"📄 Scraping halaman {page_number}: {paginated_url}")
-                        
-                        listing_urls = self.get_listing_urls(paginated_url)
-                        
-                        if not listing_urls:
-                            logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
+                    for listing_url in listing_urls:
+                        if self.stop_flag:
                             break
-
-                        for listing_url in listing_urls:
-                            if self.stop_flag:
-                                break
-                            detail = self.scrape_detail(listing_url)
-                            if detail:
-                                self.save_to_db(detail)  # Menyimpan langsung ke database
-                        page_number += 1
-
+                        detail = self.scrape_detail(listing_url)
+                        if detail:
+                            self.save_to_db(detail)  # Menyimpan langsung ke database
+                    
+                    page_number += 1
+            
             logging.info("✅ Proses scraping semua brand selesai.")
         except Exception as e:
             logging.error(f"❌ Error saat scraping semua brand: {e}")

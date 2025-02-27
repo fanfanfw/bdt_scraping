@@ -89,41 +89,44 @@ class MudahMyService:
 
         return detail
 
-    def scrape_all_brands(self):
-        """Scrape semua brand berdasarkan file CSV."""
+    def scrape_all_brands(self, start_brand=None, start_page=1):
+        """Scrape semua brand berdasarkan file CSV dengan opsi untuk melanjutkan dari titik tertentu."""
         try:
             self.reset_scraping()
             df = pd.read_csv(INPUT_FILE)
-
-            while not self.stop_flag:
-                for _, row in df.iterrows():
-                    if self.stop_flag:  
+            start_scraping = False if start_brand else True
+            
+            for _, row in df.iterrows():
+                brand = row["brand"]
+                base_brand_url = row["url"]
+                
+                if not start_scraping:
+                    if brand == start_brand:
+                        start_scraping = True
+                    else:
+                        continue  # Lewati sampai menemukan brand yang sesuai
+                
+                logging.info(f"🚀 Mulai scraping brand: {brand}")
+                page_number = start_page if brand == start_brand else 1
+                
+                while not self.stop_flag:
+                    current_url = f"{base_brand_url}?o={page_number}"
+                    logging.info(f"📄 Scraping halaman {page_number}: {current_url}")
+                    
+                    listing_urls = self.get_listing_urls(current_url)
+                    if not listing_urls:
+                        logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
                         break
                     
-                    brand = row["brand"]
-                    logging.info(f"🚀 Mulai scraping brand: {brand}")
-                    
-                    base_brand_url = row["url"]
-                    page_number = 1
-                    
-                    while not self.stop_flag:
-                        current_url = f"{base_brand_url}?o={page_number}"
-                        logging.info(f"📄 Scraping halaman {page_number}: {current_url}")
-                        
-                        listing_urls = self.get_listing_urls(current_url)
-                        
-                        if not listing_urls:
-                            logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
+                    for listing_url in listing_urls:
+                        if self.stop_flag:
                             break
-
-                        for listing_url in listing_urls:
-                            if self.stop_flag:
-                                break
-                            detail = self.scrape_detail(listing_url)
-                            if detail:
-                                self.save_to_db(detail)  
-                        page_number += 1
-
+                        detail = self.scrape_detail(listing_url)
+                        if detail:
+                            self.save_to_db(detail)  # Menyimpan langsung ke database
+                    
+                    page_number += 1
+            
             logging.info("✅ Proses scraping semua brand selesai.")
         except Exception as e:
             logging.error(f"❌ Error saat scraping semua brand: {e}")
