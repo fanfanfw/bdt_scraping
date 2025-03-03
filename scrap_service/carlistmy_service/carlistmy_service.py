@@ -22,6 +22,18 @@ INPUT_FILE = "scrap_service/carlistmy_service/storage/input_files/carlistMY_scra
 
 class CarlistMyService:
     def __init__(self):
+        self.driver = None
+        self.stop_flag = False
+        self.conn = get_connection()
+        self.cursor = self.conn.cursor()
+        
+        # Pengaturan batch
+        self.batch_size = 25   
+        self.listing_count = 0  
+
+    def init_driver(self):
+        """Inisialisasi (atau re-inisialisasi) ChromeDriver."""
+        logging.info("Menginisialisasi ChromeDriver...")
         options = Options()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
@@ -29,20 +41,39 @@ class CarlistMyService:
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--window-size=1920x1080")
         options.add_argument("--disable-blink-features=AutomationControlled")
-        options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-        
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-        self.stop_flag = False
-        self.conn = get_connection()
-        self.cursor = self.conn.cursor()
+        options.add_argument(
+            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        )
+
+        self.driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=options
+        )
+        logging.info("ChromeDriver berhasil diinisialisasi.")
+
+    def quit_driver(self):
+        """Menutup driver untuk membebaskan resource."""
+        if self.driver:
+            logging.info("Menutup ChromeDriver...")
+            try:
+                self.driver.quit()
+                logging.info("ChromeDriver berhasil ditutup.")
+            except Exception as e:
+                logging.error(f"Gagal menutup ChromeDriver: {e}")
+            self.driver = None
 
     def get_listing_urls(self, listing_page_url):
         """Mengambil semua URL listing dari halaman brand."""
         logging.info(f"📄 Mengambil listing dari: {listing_page_url}")
-        self.driver.get(listing_page_url)
-        time.sleep(3)
+
+        # Jika driver belum ada, inisialisasi
+        if not self.driver:
+            self.init_driver()
+
         try:
+            self.driver.get(listing_page_url)
+            time.sleep(3)
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.ellipsize.js-ellipsize-text"))
             )
@@ -60,9 +91,16 @@ class CarlistMyService:
             logging.info("⚠️ Scraping dihentikan sebelum mengambil detail.")
             return None
 
+        if not self.driver:
+            self.init_driver()
+
         logging.info(f"🔍 Mengambil detail dari: {detail_url}")
-        self.driver.get(detail_url)
-        time.sleep(3)
+        try:
+            self.driver.get(detail_url)
+            time.sleep(3)
+        except Exception as e:
+            logging.error(f"Error saat memuat halaman detail {detail_url}: {e}")
+            return None
 
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
@@ -113,7 +151,7 @@ class CarlistMyService:
         return detail
 
     def scrape_all_brands(self, start_brand=None, start_page=1):
-        """Scrape semua brand berdasarkan file CSV dengan opsi untuk melanjutkan dari titik tertentu."""
+        """Scrape semua brand berdasarkan file CSV dengan opsi batch untuk meminimalkan penggunaan memori."""
         try:
             self.reset_scraping()
             df = pd.read_csv(INPUT_FILE)
@@ -127,7 +165,7 @@ class CarlistMyService:
                     if brand == start_brand:
                         start_scraping = True
                     else:
-                        continue  # Lewati sampai menemukan brand yang sesuai
+                        continue  
                 
                 logging.info(f"🚀 Mulai scraping brand: {brand}")
                 page_number = start_page if brand == start_brand else 1
@@ -144,15 +182,27 @@ class CarlistMyService:
                     for listing_url in listing_urls:
                         if self.stop_flag:
                             break
+
                         detail = self.scrape_detail(listing_url)
                         if detail:
-                            self.save_to_db(detail)  # Menyimpan langsung ke database
-                    
+                            self.save_to_db(detail)
+                            self.listing_count += 1
+
+                            # Jika sudah mencapai batch_size, reinit driver
+                            if self.listing_count >= self.batch_size:
+                                logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
+                                self.quit_driver()
+                                time.sleep(5)  # Jeda agar resource benar-benar bebas
+                                self.init_driver()
+                                self.listing_count = 0
+
                     page_number += 1
             
             logging.info("✅ Proses scraping semua brand selesai.")
         except Exception as e:
             logging.error(f"❌ Error saat scraping semua brand: {e}")
+        finally:
+            self.quit_driver()
 
     def stop_scraping(self):
         logging.info("⚠️ Permintaan untuk menghentikan scraping diterima.")
@@ -160,6 +210,7 @@ class CarlistMyService:
 
     def reset_scraping(self):
         self.stop_flag = False
+        self.listing_count = 0
         logging.info("🔄 Scraping direset dan siap dimulai kembali.")
 
     def save_to_db(self, car_data):
@@ -201,4 +252,8 @@ class CarlistMyService:
             logging.error(f"❌ Error menyimpan atau memperbarui data ke database: {e}")
 
     def close(self):
-        self.driver.quit()
+        """Menutup driver dan koneksi database."""
+        self.quit_driver()
+        self.cursor.close()
+        self.conn.close()
+        logging.info("Koneksi database ditutup, driver Selenium ditutup.")

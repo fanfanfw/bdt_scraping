@@ -24,17 +24,27 @@ def stop_mudahmy():
 
 # Fungsi untuk mengambil data dari database PostgreSQL
 def fetch_latest_data():
-    conn = psycopg2.connect("dbname=scrap_mudahmy user=postgres password=secret")
+    conn = psycopg2.connect(
+        dbname="scrap_mudahmy",
+        user="fanfan",
+        password="cenanun",
+        host="localhost",
+        port="5432"  
+    )
+    
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM cars WHERE last_scraped_at >= NOW() - INTERVAL '6 hours';")
+
+    cursor.execute("SELECT * FROM cars;")
+
     rows = cursor.fetchall()
-    
+
     column_names = [desc[0] for desc in cursor.description]
+
     data = [dict(zip(column_names, row)) for row in rows]
-    
+
     cursor.close()
     conn.close()
-    
+
     return data
 
 @app.route('/export_data', methods=['GET'])

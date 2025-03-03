@@ -7,9 +7,9 @@ carlistmy_scraper = CarlistMyService()
 
 @app.route('/scrape/carlistmy', methods=['POST'])
 def scrape_carlistmy():
-    data = request.get_json()  # Ambil data JSON dari request
+    data = request.get_json()  
     brand = data.get("brand", None)
-    page = data.get("page", 1)  # Default halaman ke-1 jika tidak diberikan
+    page = data.get("page", 1)  
     
     carlistmy_scraper.stop_flag = False
     carlistmy_scraper.scrape_all_brands(start_brand=brand, start_page=page)
@@ -18,12 +18,12 @@ def scrape_carlistmy():
 
 @app.route('/stop/carlistmy', methods=['POST'])
 def stop_carlistmy():
-    carlistmy_scraper.stop_flag = True  # Set stop_flag menjadi True untuk menghentikan scraping
+    carlistmy_scraper.stop_flag = True  
     return jsonify({"message": "Scraping CarlistMY dihentikan."}), 200
 
 # Fungsi untuk mengambil data dari database PostgreSQL
 def fetch_latest_data():
-    conn = psycopg2.connect("dbname=scrap_mudahmy user=fanfan password=secret")
+    conn = psycopg2.connect("dbname=scrap_mudahmy user=fanfan password=cenanun")
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM cars WHERE last_scraped_at >= NOW() - INTERVAL '6 hours';")
     rows = cursor.fetchall()
