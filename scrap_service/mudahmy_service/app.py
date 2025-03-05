@@ -7,12 +7,14 @@ mudahmy_scraper = MudahMyService()
 
 @app.route('/scrape/mudahmy', methods=['POST'])
 def scrape_mudahmy():
-    data = request.get_json()  
-    brand = data.get("brand", None)  
-    page = data.get("page", 1)  
+    data = request.get_json()
+    brand = data.get("brand", None)
+    model = data.get("model", None)
+    page = data.get("page", 1)
     
     mudahmy_scraper.stop_flag = False
-    mudahmy_scraper.scrape_all_brands(start_brand=brand, start_page=page)
+    # Jika brand dan/atau model diberikan, hanya baris CSV yang sesuai yang akan diproses
+    mudahmy_scraper.scrape_all_brands(start_brand=brand, start_model=model, start_page=page)
     
     return jsonify({"message": "Scraping MudahMY selesai"}), 200
 
@@ -33,18 +35,12 @@ def fetch_latest_data():
     )
     
     cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM cars;")
-
     rows = cursor.fetchall()
-
     column_names = [desc[0] for desc in cursor.description]
-
     data = [dict(zip(column_names, row)) for row in rows]
-
     cursor.close()
     conn.close()
-
     return data
 
 @app.route('/export_data', methods=['GET'])

@@ -121,33 +121,42 @@ class MudahMyService:
 
         return detail
 
-    def scrape_all_brands(self, start_brand=None, start_page=1):
-        """Scrape semua brand berdasarkan file CSV dengan metode batch."""
+    def scrape_all_brands(self, start_brand=None, start_model=None, start_page=1):
+        """
+        Scrape semua baris dari CSV.
+        Jika start_brand dan start_model diberikan, cari baris pertama yang cocok dan mulai dari baris tersebut.
+        Jika JSON kosong, proses seluruh data.
+        """
         try:
             self.reset_scraping()
             df = pd.read_csv(INPUT_FILE)
-            start_scraping = False if start_brand else True
             
+            # Jika start_brand dan start_model diberikan, cari indeks baris pertama yang cocok.
+            if start_brand and start_model:
+                mask = (df['brand'] == start_brand) & (df['model'] == start_model)
+                if mask.any():
+                    start_index = df[mask].index[0]
+                    df = df.iloc[start_index:]
+                    logging.info(f"Mulai scraping dari indeks {start_index} (brand: {start_brand}, model: {start_model})")
+                else:
+                    logging.warning("Brand dan model tidak ditemukan, scraping seluruh data.")
+            
+            # Iterasi seluruh baris (mulai dari baris awal atau dari baris yang telah ditentukan)
             for _, row in df.iterrows():
                 brand = row["brand"]
+                model = row["model"]
                 base_brand_url = row["url"]
                 
-                if not start_scraping:
-                    if brand == start_brand:
-                        start_scraping = True
-                    else:
-                        continue
-
-                logging.info(f"🚀 Mulai scraping brand: {brand}")
-                page_number = start_page if brand == start_brand else 1
-
+                logging.info(f"🚀 Mulai scraping brand: {brand}, model: {model}")
+                page_number = start_page
+                
                 while not self.stop_flag:
                     current_url = f"{base_brand_url}?o={page_number}"
                     logging.info(f"📄 Scraping halaman {page_number}: {current_url}")
-
+                    
                     listing_urls = self.get_listing_urls(current_url)
                     if not listing_urls:
-                        logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
+                        logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Pindah ke data berikutnya.")
                         break
 
                     for listing_url in listing_urls:
@@ -155,25 +164,27 @@ class MudahMyService:
                             break
                         detail = self.scrape_detail(listing_url)
                         if detail:
+                            # Pastikan brand dan model di-update dari data CSV
+                            detail["brand"] = brand
+                            detail["model"] = model
                             self.save_to_db(detail)
                             self.listing_count += 1
 
-                            # Jika sudah mencapai batch_size, reinitialize driver
                             if self.listing_count >= self.batch_size:
                                 logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
                                 self.quit_driver()
-                                time.sleep(5)  # jeda sejenak
+                                time.sleep(5)
                                 self.init_driver()
                                 self.listing_count = 0
 
                     page_number += 1
             
-            logging.info("✅ Proses scraping semua brand selesai.")
+            logging.info("✅ Proses scraping selesai.")
         except Exception as e:
-            logging.error(f"❌ Error saat scraping semua brand: {e}")
+            logging.error(f"❌ Error saat scraping: {e}")
         finally:
-            # Pastikan driver ditutup pada akhirnya
             self.quit_driver()
+
 
     def stop_scraping(self):
         logging.info("⚠️ Permintaan untuk menghentikan scraping diterima.")
