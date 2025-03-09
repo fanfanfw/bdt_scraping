@@ -1,0 +1,52 @@
+2025-03-09 15:05:28,712 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5002
+ * Running on http://192.168.1.7:5002
+2025-03-09 15:05:28,713 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-09 15:05:28,713 - INFO -  * Restarting with stat
+2025-03-09 15:05:29,039 - WARNING -  * Debugger is active!
+2025-03-09 15:05:29,040 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:08:29,205 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5003
+ * Running on http://192.168.1.7:5003
+2025-03-09 15:08:29,205 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-09 15:08:29,206 - INFO -  * Restarting with stat
+2025-03-09 15:08:29,518 - WARNING -  * Debugger is active!
+2025-03-09 15:08:29,519 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:08:49,722 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/imagedownload_service/app.py', reloading
+2025-03-09 15:08:49,799 - INFO -  * Restarting with stat
+2025-03-09 15:08:50,166 - WARNING -  * Debugger is active!
+2025-03-09 15:08:50,167 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:08:58,256 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/imagedownload_service/app.py', reloading
+2025-03-09 15:08:58,318 - INFO -  * Restarting with stat
+2025-03-09 15:08:58,617 - INFO - ✅ Service ImageDownload berjalan di http://127.0.0.1:5002
+2025-03-09 15:08:58,626 - WARNING -  * Debugger is active!
+2025-03-09 15:08:58,626 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:08:59,645 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/imagedownload_service/app.py', reloading
+2025-03-09 15:08:59,723 - INFO -  * Restarting with stat
+2025-03-09 15:09:00,077 - INFO - ✅ Service ImageDownload berjalan di http://127.0.0.1:5002
+2025-03-09 15:09:00,087 - WARNING -  * Debugger is active!
+2025-03-09 15:09:00,087 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:09:09,688 - INFO - ✅ Service ImageDownload berjalan di http://127.0.0.1:5002
+2025-03-09 15:09:09,706 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5003
+ * Running on http://192.168.1.7:5003
+2025-03-09 15:09:09,706 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-09 15:09:09,707 - INFO -  * Restarting with stat
+2025-03-09 15:09:10,014 - INFO - ✅ Service ImageDownload berjalan di http://127.0.0.1:5002
+2025-03-09 15:09:10,024 - WARNING -  * Debugger is active!
+2025-03-09 15:09:10,024 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:10:21,214 - INFO - ✅ Service ImageDownload berjalan di http://127.0.0.1:5002
+2025-03-09 15:10:21,234 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5003
+ * Running on http://192.168.1.7:5003
+2025-03-09 15:10:21,235 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-09 15:10:21,235 - INFO -  * Restarting with stat
+2025-03-09 15:10:21,563 - INFO - ✅ Service ImageDownload berjalan di http://127.0.0.1:5002
+2025-03-09 15:10:21,575 - WARNING -  * Debugger is active!
+2025-03-09 15:10:21,575 - INFO -  * Debugger PIN: 451-797-258
+2025-03-09 15:20:27,024 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/imagedownload_service/imagedownload_service.py', reloading
+2025-03-09 15:20:27,090 - INFO -  * Restarting with stat
