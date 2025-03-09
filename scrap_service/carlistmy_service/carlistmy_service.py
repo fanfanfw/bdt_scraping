@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
 from .database import get_connection
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,6 +23,7 @@ INPUT_FILE = "scrap_service/carlistmy_service/storage/input_files/carlistMY_scra
 
 class CarlistMyService:
     def __init__(self):
+        # kita akan inisialisasi manual melalui init_driver()
         self.driver = None
         self.stop_flag = False
         self.conn = get_connection()
@@ -32,8 +34,9 @@ class CarlistMyService:
         self.listing_count = 0  
 
     def init_driver(self):
-        """Inisialisasi (atau re-inisialisasi) ChromeDriver."""
         logging.info("Menginisialisasi ChromeDriver...")
+
+        # Kita siapkan ChromeOptions
         options = Options()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
@@ -46,10 +49,19 @@ class CarlistMyService:
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )
 
+        # Di Selenium 4, kita bisa set capability via set_capability:
+        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
+        # Boleh juga menambahkan capability lain di sini.
+
+        # Set page load timeout nanti kita panggil setelah driver terbentuk
         self.driver = webdriver.Chrome(
             service=Service(ChromeDriverManager().install()),
             options=options
         )
+
+        # Page load timeout
+        self.driver.set_page_load_timeout(120)
+
         logging.info("ChromeDriver berhasil diinisialisasi.")
 
     def quit_driver(self):
@@ -62,12 +74,40 @@ class CarlistMyService:
             except Exception as e:
                 logging.error(f"Gagal menutup ChromeDriver: {e}")
             self.driver = None
+            
+    def log_browser_console(self):
+        """Log pesan console dari browser (jika ada)."""
+        try:
+            logs = self.driver.get_log('browser')
+            for entry in logs:
+                # entry = {'level': 'INFO', 'message': '...', 'timestamp': 123456789}
+                logging.info(f"BROWSER LOG [{entry['level']}]: {entry['message']}")
+        except Exception as e:
+            logging.error(f"Gagal mengambil browser console logs: {e}")
+            
+    def debug_dump(self, prefix):
+        """Simpan screenshot dan page_source untuk keperluan debugging."""
+        timestamp = int(time.time())
+        screenshot_name = f"{prefix}_{timestamp}.png"
+        html_name = f"{prefix}_{timestamp}.html"
+
+        try:
+            self.driver.save_screenshot(screenshot_name)
+            logging.info(f"Screenshot disimpan: {screenshot_name}")
+        except Exception as e:
+            logging.error(f"Gagal mengambil screenshot: {e}")
+
+        try:
+            page_source = self.driver.page_source
+            with open(html_name, "w", encoding="utf-8") as f:
+                f.write(page_source)
+            logging.info(f"HTML page source disimpan: {html_name}")
+        except Exception as e:
+            logging.error(f"Gagal menyimpan HTML page source: {e}")
 
     def get_listing_urls(self, listing_page_url):
-        """Mengambil semua URL listing dari halaman brand."""
         logging.info(f"📄 Mengambil listing dari: {listing_page_url}")
 
-        # Jika driver belum ada, inisialisasi
         if not self.driver:
             self.init_driver()
 
@@ -80,13 +120,19 @@ class CarlistMyService:
             elements = self.driver.find_elements(By.CSS_SELECTOR, "a.ellipsize.js-ellipsize-text")
             urls = list(set(elem.get_attribute("href") for elem in elements if elem.get_attribute("href")))
             logging.info(f"✅ Ditemukan {len(urls)} listing URLs.")
+
+            # [OPSIONAL] Cek log console
+            self.log_browser_console()
+
             return urls
+
         except Exception as e:
             logging.error(f"❌ Error mengambil listing URLs: {e}")
-            return []
+
+            # Tangkap screenshot & HTML dump
+            self.debug_dump("get_listing_urls_error")
 
     def scrape_detail(self, detail_url):
-        """Scraping detail dari satu listing."""
         if self.stop_flag:
             logging.info("⚠️ Scraping dihentikan sebelum mengambil detail.")
             return None
@@ -100,7 +146,14 @@ class CarlistMyService:
             time.sleep(3)
         except Exception as e:
             logging.error(f"Error saat memuat halaman detail {detail_url}: {e}")
+
+            # Tangkap screenshot & HTML dump
+            self.debug_dump("scrape_detail_error")
+
             return None
+
+        # [OPSIONAL] Cek log console
+        self.log_browser_console()
 
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
@@ -171,6 +224,7 @@ class CarlistMyService:
                 page_number = start_page if brand == start_brand else 1
                 
                 while not self.stop_flag:
+                    # lalu kita ganti dengan page_number sekarang
                     paginated_url = re.sub(r"(page_number=)\d+", lambda m: m.group(1) + str(page_number), base_brand_url)
                     logging.info(f"📄 Scraping halaman {page_number}: {paginated_url}")
                     
@@ -192,7 +246,7 @@ class CarlistMyService:
                             if self.listing_count >= self.batch_size:
                                 logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
                                 self.quit_driver()
-                                time.sleep(5)  # Jeda agar resource benar-benar bebas
+                                time.sleep(2)  # Jeda agar resource benar-benar bebas
                                 self.init_driver()
                                 self.listing_count = 0
 
@@ -202,6 +256,7 @@ class CarlistMyService:
         except Exception as e:
             logging.error(f"❌ Error saat scraping semua brand: {e}")
         finally:
+            # Pastikan driver ditutup pada akhirnya
             self.quit_driver()
 
     def stop_scraping(self):
