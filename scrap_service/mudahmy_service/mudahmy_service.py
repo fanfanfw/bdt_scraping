@@ -60,27 +60,33 @@ class MudahMyService:
             self.driver = None
 
     def get_listing_urls(self, listing_page_url):
-        """Mengambil semua URL listing dari halaman brand."""
+        """Mengambil semua URL listing dari halaman brand dengan mekanisme retry jika terjadi error."""
         logging.info(f"📄 Mengambil listing dari: {listing_page_url}")
         if not self.driver:
             self.init_driver()
-
-        try:
-            self.driver.get(listing_page_url)
-            time.sleep(3)
-            WebDriverWait(self.driver, 60).until(
-                EC.presence_of_all_elements_located((By.XPATH, "//div[@data-testid[contains(., 'listing-ad-item')]]//a"))
-            )
-            elements = self.driver.find_elements(By.XPATH, "//div[@data-testid[contains(., 'listing-ad-item')]]//a")
-            urls = list(set(elem.get_attribute("href") for elem in elements if elem.get_attribute("href")))
-            logging.info(f"✅ Ditemukan {len(urls)} listing URLs.")
-            return urls
-        except Exception as e:
-            logging.error(f"❌ Error mengambil listing URLs: {e}")
-            return []
+        max_retries = 3
+        attempt = 0
+        while attempt < max_retries:
+            try:
+                self.driver.get(listing_page_url)
+                time.sleep(3)
+                WebDriverWait(self.driver, 60).until(
+                    EC.presence_of_all_elements_located((By.XPATH, "//div[@data-testid[contains(., 'listing-ad-item')]]//a"))
+                )
+                elements = self.driver.find_elements(By.XPATH, "//div[@data-testid[contains(., 'listing-ad-item')]]//a")
+                urls = list(set(elem.get_attribute("href") for elem in elements if elem.get_attribute("href")))
+                logging.info(f"✅ Ditemukan {len(urls)} listing URLs.")
+                return urls
+            except Exception as e:
+                attempt += 1
+                logging.error(f"❌ Error mengambil listing URLs: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                self.quit_driver()
+                time.sleep(5)
+                self.init_driver()
+        return []
 
     def scrape_detail(self, detail_url):
-        """Scraping detail dari satu listing."""
+        """Scraping detail dari satu listing dengan mekanisme retry jika terjadi error."""
         if self.stop_flag:
             logging.info("⚠️ Scraping dihentikan sebelum mengambil detail.")
             return None
@@ -88,38 +94,44 @@ class MudahMyService:
         if not self.driver:
             self.init_driver()
 
-        logging.info(f"🔍 Mengambil detail dari: {detail_url}")
-        try:
-            self.driver.get(detail_url)
-            time.sleep(3)
-        except Exception as e:
-            logging.error(f"Error saat memuat halaman detail {detail_url}: {e}")
-            return None
+        max_retries = 3
+        attempt = 0
+        while attempt < max_retries:
+            logging.info(f"🔍 Mengambil detail dari: {detail_url}")
+            try:
+                self.driver.get(detail_url)
+                time.sleep(3)
+                soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+                def extract(selector):
+                    element = soup.select_one(selector)
+                    return element.text.strip() if element else None
 
-        def extract(selector):
-            element = soup.select_one(selector)
-            return element.text.strip() if element else None
+                detail = {
+                    "listing_url": detail_url,
+                    "price": extract("#ad_view_ad_highlights > div > div > div.flex.gap-1.md\\:items-end > div"),
+                    "informasi_iklan": extract("#ad_view_ad_highlights > div > div > div:nth-child(1) > div > div > div"),
+                    "year": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(1) > div"),
+                    "transmission": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(2) > div"),
+                    "millage": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(3) > div"),
+                    "lokasi": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(4) > div"),
+                    "brand": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)"),
+                    "model": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(3)"),
+                    "variant": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(1) > div:nth-child(4) > div:nth-child(3)"),
+                    "seat_capacity": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div:nth-child(3)"),
+                }
 
-        detail = {
-            "listing_url": detail_url,
-            "price": extract("#ad_view_ad_highlights > div > div > div.flex.gap-1.md\\:items-end > div"),
-            "informasi_iklan": extract("#ad_view_ad_highlights > div > div > div:nth-child(1) > div > div > div"),
-            "year": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(1) > div"),
-            "transmission": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(2) > div"),
-            "millage": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(3) > div"),
-            "lokasi": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(4) > div"),
-            "brand": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(3)"),
-            "model": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(1) > div:nth-child(2) > div:nth-child(3)"),
-            "variant": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(1) > div:nth-child(4) > div:nth-child(3)"),
-            "seat_capacity": extract("#ad_view_car_specifications > div > div > div > div > div > div:nth-child(2) > div:nth-child(3) > div:nth-child(3)"),
-        }
+                img_elements = soup.select("img.w-full.h-full.bg-black.md\\:object-cover.object-contain")
+                detail["gambar"] = [img["src"] for img in img_elements if "src" in img.attrs and "mudah" not in img["src"]]
 
-        img_elements = soup.select("img.w-full.h-full.bg-black.md\\:object-cover.object-contain")
-        detail["gambar"] = [img["src"] for img in img_elements if "src" in img.attrs and "mudah" not in img["src"]]
-
-        return detail
+                return detail
+            except Exception as e:
+                attempt += 1
+                logging.error(f"Error saat memuat halaman detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                self.quit_driver()
+                time.sleep(5)
+                self.init_driver()
+        return None
 
     def scrape_all_brands(self, start_brand=None, start_model=None, start_page=1):
         """
@@ -164,7 +176,6 @@ class MudahMyService:
                             break
                         detail = self.scrape_detail(listing_url)
                         if detail:
-                            # Pastikan brand dan model di-update dari data CSV
                             detail["brand"] = brand
                             detail["model"] = model
                             self.save_to_db(detail)
@@ -184,7 +195,6 @@ class MudahMyService:
             logging.error(f"❌ Error saat scraping: {e}")
         finally:
             self.quit_driver()
-
 
     def stop_scraping(self):
         logging.info("⚠️ Permintaan untuk menghentikan scraping diterima.")
