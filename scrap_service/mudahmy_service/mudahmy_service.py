@@ -60,7 +60,7 @@ class MudahMyService:
             self.driver = None
 
     def get_listing_urls(self, listing_page_url):
-        """Mengambil semua URL listing dari halaman brand dengan mekanisme retry jika terjadi error."""
+        """Mengambil semua URL listing dari halaman brand dengan retry khusus untuk error HTTPConnectionPool."""
         logging.info(f"📄 Mengambil listing dari: {listing_page_url}")
         if not self.driver:
             self.init_driver()
@@ -78,15 +78,21 @@ class MudahMyService:
                 logging.info(f"✅ Ditemukan {len(urls)} listing URLs.")
                 return urls
             except Exception as e:
-                attempt += 1
-                logging.error(f"❌ Error mengambil listing URLs: {e}. Mencoba lagi ({attempt}/{max_retries})...")
-                self.quit_driver()
-                time.sleep(5)
-                self.init_driver()
+                # Hanya lakukan retry jika error adalah HTTPConnectionPool Read timed out
+                if "HTTPConnectionPool" in str(e):
+                    attempt += 1
+                    logging.error(f"❌ Error HTTPConnectionPool saat mengambil listing URLs: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    self.quit_driver()
+                    time.sleep(5)
+                    self.init_driver()
+                else:
+                    logging.error(f"❌ Error lain saat mengambil listing URLs: {e}. Tidak dilakukan retry.")
+                    return []
         return []
 
+
     def scrape_detail(self, detail_url):
-        """Scraping detail dari satu listing dengan mekanisme retry jika terjadi error."""
+        """Scraping detail dari satu listing dengan retry khusus untuk error HTTPConnectionPool."""
         if self.stop_flag:
             logging.info("⚠️ Scraping dihentikan sebelum mengambil detail.")
             return None
@@ -126,12 +132,17 @@ class MudahMyService:
 
                 return detail
             except Exception as e:
-                attempt += 1
-                logging.error(f"Error saat memuat halaman detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
-                self.quit_driver()
-                time.sleep(5)
-                self.init_driver()
+                if "HTTPConnectionPool" in str(e):
+                    attempt += 1
+                    logging.error(f"❌ Error HTTPConnectionPool saat memuat detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    self.quit_driver()
+                    time.sleep(5)
+                    self.init_driver()
+                else:
+                    logging.error(f"❌ Error lain saat memuat detail {detail_url}: {e}. Tidak dilakukan retry.")
+                    return None
         return None
+
 
     def scrape_all_brands(self, start_brand=None, start_model=None, start_page=1):
         """
