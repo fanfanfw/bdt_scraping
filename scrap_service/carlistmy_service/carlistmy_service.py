@@ -23,20 +23,16 @@ INPUT_FILE = "scrap_service/carlistmy_service/storage/input_files/carlistMY_scra
 
 class CarlistMyService:
     def __init__(self):
-        # kita akan inisialisasi manual melalui init_driver()
         self.driver = None
         self.stop_flag = False
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
         
-        # Pengaturan batch
         self.batch_size = 25   
         self.listing_count = 0  
 
     def init_driver(self):
         logging.info("Menginisialisasi ChromeDriver...")
-
-        # Kita siapkan ChromeOptions
         options = Options()
         options.add_argument("--headless")
         options.add_argument("--disable-gpu")
@@ -48,21 +44,14 @@ class CarlistMyService:
             "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )
-
-        # Di Selenium 4, kita bisa set capability via set_capability:
-        options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
-        # Boleh juga menambahkan capability lain di sini.
-
-        # Set page load timeout nanti kita panggil setelah driver terbentuk
+        
         self.driver = webdriver.Chrome(
             service=Service(ChromeDriverManager().install()),
             options=options
         )
-
-        # Page load timeout
         self.driver.set_page_load_timeout(120)
-
         logging.info("ChromeDriver berhasil diinisialisasi.")
+
 
     def quit_driver(self):
         """Menutup driver untuk membebaskan resource."""
@@ -74,17 +63,7 @@ class CarlistMyService:
             except Exception as e:
                 logging.error(f"Gagal menutup ChromeDriver: {e}")
             self.driver = None
-            
-    def log_browser_console(self):
-        """Log pesan console dari browser (jika ada)."""
-        try:
-            logs = self.driver.get_log('browser')
-            for entry in logs:
-                # entry = {'level': 'INFO', 'message': '...', 'timestamp': 123456789}
-                logging.info(f"BROWSER LOG [{entry['level']}]: {entry['message']}")
-        except Exception as e:
-            logging.error(f"Gagal mengambil browser console logs: {e}")
-            
+                        
     def debug_dump(self, prefix):
         """Simpan screenshot dan page_source untuk keperluan debugging."""
         timestamp = int(time.time())
@@ -111,26 +90,31 @@ class CarlistMyService:
         if not self.driver:
             self.init_driver()
 
-        try:
-            self.driver.get(listing_page_url)
-            time.sleep(3)
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.ellipsize.js-ellipsize-text"))
-            )
-            elements = self.driver.find_elements(By.CSS_SELECTOR, "a.ellipsize.js-ellipsize-text")
-            urls = list(set(elem.get_attribute("href") for elem in elements if elem.get_attribute("href")))
-            logging.info(f"✅ Ditemukan {len(urls)} listing URLs.")
-
-            # [OPSIONAL] Cek log console
-            self.log_browser_console()
-
-            return urls
-
-        except Exception as e:
-            logging.error(f"❌ Error mengambil listing URLs: {e}")
-
-            # Tangkap screenshot & HTML dump
-            self.debug_dump("get_listing_urls_error")
+        max_retries = 3
+        attempt = 0
+        while attempt < max_retries:
+            try:
+                self.driver.get(listing_page_url)
+                time.sleep(3)
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.ellipsize.js-ellipsize-text"))
+                )
+                elements = self.driver.find_elements(By.CSS_SELECTOR, "a.ellipsize.js-ellipsize-text")
+                urls = list(set(elem.get_attribute("href") for elem in elements if elem.get_attribute("href")))
+                logging.info(f"✅ Ditemukan {len(urls)} listing URLs.")
+                return urls
+            except Exception as e:
+                if "HTTPConnectionPool" in str(e):
+                    attempt += 1
+                    logging.error(f"❌ Error HTTPConnectionPool saat mengambil listing URLs: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    self.quit_driver()
+                    time.sleep(5)
+                    self.init_driver()
+                else:
+                    logging.error(f"❌ Error lain saat mengambil listing URLs: {e}. Tidak dilakukan retry.")
+                    self.debug_dump("get_listing_urls_error")
+                    return []
+        return []
 
     def scrape_detail(self, detail_url):
         if self.stop_flag:
@@ -140,20 +124,28 @@ class CarlistMyService:
         if not self.driver:
             self.init_driver()
 
-        logging.info(f"🔍 Mengambil detail dari: {detail_url}")
-        try:
-            self.driver.get(detail_url)
-            time.sleep(3)
-        except Exception as e:
-            logging.error(f"Error saat memuat halaman detail {detail_url}: {e}")
-
-            # Tangkap screenshot & HTML dump
-            self.debug_dump("scrape_detail_error")
-
+        max_retries = 3
+        attempt = 0
+        while attempt < max_retries:
+            logging.info(f"🔍 Mengambil detail dari: {detail_url}")
+            try:
+                self.driver.get(detail_url)
+                time.sleep(3)
+                break
+            except Exception as e:
+                if "HTTPConnectionPool" in str(e):
+                    attempt += 1
+                    logging.error(f"❌ Error HTTPConnectionPool saat memuat halaman detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    self.quit_driver()
+                    time.sleep(5)
+                    self.init_driver()
+                else:
+                    logging.error(f"❌ Error lain saat memuat halaman detail {detail_url}: {e}. Tidak dilakukan retry.")
+                    self.debug_dump("scrape_detail_error")
+                    return None
+        else:
+            logging.error(f"❌ Gagal memuat halaman detail {detail_url} setelah {max_retries} percobaan.")
             return None
-
-        # [OPSIONAL] Cek log console
-        self.log_browser_console()
 
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
@@ -165,7 +157,7 @@ class CarlistMyService:
         model = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(4) > a > span")
         variant = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(5) > a > span")
 
-        informasi_iklan = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--masthead.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-2\\@mobile > div > div > div:nth-child(1) > span.u-color-muted.u-text-7.u-hide\@mobile")
+        informasi_iklan = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--masthead.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-2\\@mobile > div > div > div:nth-child(1) > span.u-color-muted.u-text-7.u-hide\\@mobile")
         
         lokasi_part1 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
         lokasi_part2 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
@@ -181,7 +173,6 @@ class CarlistMyService:
                     gambar.append(src)
 
         price = extract("#details-gallery > div > div > div.c-gallery--hero-img.u-relative > div.c-gallery__item > div.c-gallery__item-details.u-padding-lg.u-padding-md\\@mobile.u-absolute.u-bottom-right.u-bottom-left.u-zindex-1 > div > div.listing__item-price > h3")
-
         year = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(2) > div > div > div > span.u-text-bold.u-block")
         millage = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(3) > div > div > div > span.u-text-bold.u-block")
         transmission = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(6) > div > div > div > span.u-text-bold.u-block")
@@ -224,40 +215,56 @@ class CarlistMyService:
                 page_number = start_page if brand == start_brand else 1
                 
                 while not self.stop_flag:
-                    # lalu kita ganti dengan page_number sekarang
-                    paginated_url = re.sub(r"(page_number=)\d+", lambda m: m.group(1) + str(page_number), base_brand_url)
-                    logging.info(f"📄 Scraping halaman {page_number}: {paginated_url}")
-                    
-                    listing_urls = self.get_listing_urls(paginated_url)
-                    if not listing_urls:
-                        logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
-                        break
-                    
-                    for listing_url in listing_urls:
-                        if self.stop_flag:
+                    try:
+                        # Format URL dengan page_number
+                        paginated_url = re.sub(r"(page_number=)\d+", lambda m: m.group(1) + str(page_number), base_brand_url)
+                        logging.info(f"📄 Scraping halaman {page_number}: {paginated_url}")
+                        
+                        listing_urls = self.get_listing_urls(paginated_url)
+                        if not listing_urls:
+                            logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
                             break
+                        
+                        for listing_url in listing_urls:
+                            if self.stop_flag:
+                                break
 
-                        detail = self.scrape_detail(listing_url)
-                        if detail:
-                            self.save_to_db(detail)
-                            self.listing_count += 1
+                            detail = self.scrape_detail(listing_url)
+                            if detail:
+                                self.save_to_db(detail)
+                                self.listing_count += 1
 
-                            # Jika sudah mencapai batch_size, reinit driver
-                            if self.listing_count >= self.batch_size:
-                                logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
-                                self.quit_driver()
-                                time.sleep(2)  # Jeda agar resource benar-benar bebas
-                                self.init_driver()
-                                self.listing_count = 0
+                                # Jika sudah mencapai batch_size, restart driver untuk menghemat memori
+                                if self.listing_count >= self.batch_size:
+                                    logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
+                                    self.quit_driver()
+                                    time.sleep(3)  
+                                    self.init_driver()
+                                    self.listing_count = 0
 
-                    page_number += 1
-            
+                        page_number += 1
+
+                    except Exception as e:
+                        logging.error(f"❌ Error saat scraping halaman {page_number}: {e}")
+                        
+                        # Jika error karena timeout, restart driver dan lanjut dari halaman terakhir
+                        if "timeout" in str(e).lower():
+                            logging.warning(f"⚠️ Timeout terjadi. Restarting ChromeDriver...")
+                            self.quit_driver()
+                            time.sleep(5)
+                            self.init_driver()
+                            logging.info(f"Melanjutkan scraping dari halaman {page_number} untuk brand {brand}...")
+
+                        else:
+                            logging.error("❌ Error fatal, menghentikan scraping brand ini.")
+                            break  # Lewati brand jika error terlalu fatal
+                
             logging.info("✅ Proses scraping semua brand selesai.")
         except Exception as e:
             logging.error(f"❌ Error saat scraping semua brand: {e}")
         finally:
-            # Pastikan driver ditutup pada akhirnya
             self.quit_driver()
+
 
     def stop_scraping(self):
         logging.info("⚠️ Permintaan untuk menghentikan scraping diterima.")

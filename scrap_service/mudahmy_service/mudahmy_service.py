@@ -160,19 +160,21 @@ class MudahMyService:
                 if mask.any():
                     start_index = df[mask].index[0]
                     df = df.iloc[start_index:]
-                    logging.info(f"Mulai scraping dari indeks {start_index} (brand: {start_brand}, model: {start_model})")
+                    logging.info(f"📌 Mulai scraping dari indeks {start_index} (brand: {start_brand}, model: {start_model})")
                 else:
-                    logging.warning("Brand dan model tidak ditemukan, scraping seluruh data.")
+                    logging.warning("⚠️ Brand dan model tidak ditemukan, scraping seluruh data.")
             
             # Iterasi seluruh baris (mulai dari baris awal atau dari baris yang telah ditentukan)
             for _, row in df.iterrows():
                 brand = row["brand"]
                 model = row["model"]
                 base_brand_url = row["url"]
+
+                # ✅ Reset page_number ke 1 setiap kali pindah ke brand/model baru
+                page_number = start_page if (brand == start_brand and model == start_model) else 1
                 
-                logging.info(f"🚀 Mulai scraping brand: {brand}, model: {model}")
-                page_number = start_page
-                
+                logging.info(f"🚀 Mulai scraping brand: {brand}, model: {model} dari halaman {page_number}")
+
                 while not self.stop_flag:
                     current_url = f"{base_brand_url}?o={page_number}"
                     logging.info(f"📄 Scraping halaman {page_number}: {current_url}")
@@ -180,32 +182,35 @@ class MudahMyService:
                     listing_urls = self.get_listing_urls(current_url)
                     if not listing_urls:
                         logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Pindah ke data berikutnya.")
-                        break
+                        break  # Berhenti untuk model ini, lanjut ke berikutnya
 
                     for listing_url in listing_urls:
                         if self.stop_flag:
                             break
                         detail = self.scrape_detail(listing_url)
                         if detail:
+                            # Pastikan brand dan model tetap terisi dengan benar
                             detail["brand"] = brand
                             detail["model"] = model
                             self.save_to_db(detail)
                             self.listing_count += 1
 
+                            # ✅ Restart driver setiap batch untuk mencegah memory leak
                             if self.listing_count >= self.batch_size:
-                                logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
+                                logging.info(f"♻️ Batch {self.batch_size} listing tercapai, reinit driver...")
                                 self.quit_driver()
                                 time.sleep(5)
                                 self.init_driver()
                                 self.listing_count = 0
 
-                    page_number += 1
+                    page_number += 1  # ✅ Tambah page number hanya dalam satu brand/model
             
             logging.info("✅ Proses scraping selesai.")
         except Exception as e:
             logging.error(f"❌ Error saat scraping: {e}")
         finally:
             self.quit_driver()
+
 
     def stop_scraping(self):
         logging.info("⚠️ Permintaan untuk menghentikan scraping diterima.")
