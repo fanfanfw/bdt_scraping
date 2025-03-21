@@ -28,7 +28,7 @@ class MudahMyService:
         self.cursor = self.conn.cursor()
 
         # Pengaturan batch
-        self.batch_size = 80   
+        self.batch_size = 40   
         self.listing_count = 0  
 
     def init_driver(self):
@@ -90,6 +90,14 @@ class MudahMyService:
                     return []
         return []
 
+    def convert_price_to_integer(self, price_string):
+        """Mengonversi harga dalam format string (misalnya "RM 38,800") ke tipe data INTEGER"""
+        price_clean = re.sub(r"[^\d]", "", price_string)
+        
+        try:
+            return int(price_clean) 
+        except ValueError:
+            return None
 
     def scrape_detail(self, detail_url):
         """Scraping detail dari satu listing dengan retry khusus untuk error HTTPConnectionPool."""
@@ -115,7 +123,7 @@ class MudahMyService:
 
                 detail = {
                     "listing_url": detail_url,
-                    "price": extract("#ad_view_ad_highlights > div > div > div.flex.gap-1.md\\:items-end > div"),
+                    "price": self.convert_price_to_integer(extract("#ad_view_ad_highlights > div > div > div.flex.gap-1.md\\:items-end > div")),  # Konversi harga
                     "informasi_iklan": extract("#ad_view_ad_highlights > div > div > div:nth-child(1) > div > div > div"),
                     "year": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(1) > div"),
                     "transmission": extract("#ad_view_ad_highlights > div > div > div.flex.flex-wrap.lg\\:flex-nowrap.gap-3\\.5 > div:nth-child(2) > div"),
@@ -142,7 +150,6 @@ class MudahMyService:
                     logging.error(f"❌ Error lain saat memuat detail {detail_url}: {e}. Tidak dilakukan retry.")
                     return None
         return None
-
 
     def scrape_all_brands(self, start_brand=None, start_model=None, start_page=1):
         """
@@ -222,39 +229,70 @@ class MudahMyService:
         logging.info("🔄 Scraping direset dan siap dimulai kembali.")
 
     def save_to_db(self, car_data):
-        """Menyimpan atau memperbarui data mobil ke database PostgreSQL."""
+        """Menyimpan atau memperbarui data mobil ke database PostgreSQL dan melacak perubahan harga."""
         try:
-            select_query = "SELECT id FROM cars WHERE listing_url = %s"
+            # Konversi brand, model, dan variant ke uppercase
+            car_data['brand'] = car_data['brand'].upper() if car_data['brand'] else None
+            car_data['model'] = car_data['model'].upper() if car_data['model'] else None
+            car_data['variant'] = car_data['variant'].upper() if car_data['variant'] else None
+
+            select_query = "SELECT id, price, previous_price FROM cars WHERE listing_url = %s"
             self.cursor.execute(select_query, (car_data['listing_url'],))
             result = self.cursor.fetchone()
 
             if result:  # Data sudah ada, update
-                update_query = """
-                    UPDATE cars
-                    SET price = %s, informasi_iklan = %s, lokasi = %s, year = %s, millage = %s,
-                         transmission = %s, seat_capacity = %s, gambar = %s,
-                         last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
-                    WHERE listing_url = %s
-                """
-                self.cursor.execute(update_query, (
-                    car_data['price'], car_data['informasi_iklan'], car_data['lokasi'],
-                    car_data['year'], car_data['millage'],
-                    car_data['transmission'], car_data['seat_capacity'], car_data['gambar'],
-                    car_data['listing_url']
-                ))
+                car_id, old_price, previous_price = result
+                
+                # Jika harga baru berbeda dari harga lama, simpan riwayat perubahan harga
+                if car_data['price'] != old_price:
+                    # Simpan perubahan harga ke price_history
+                    insert_history_query = """
+                        INSERT INTO price_history (car_id, old_price, new_price, changed_at)
+                        VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+                    """
+                    self.cursor.execute(insert_history_query, (car_id, old_price, car_data['price']))
+
+                    # Update harga dan previous_price di tabel cars
+                    update_query = """
+                        UPDATE cars
+                        SET price = %s, previous_price = %s, informasi_iklan = %s, lokasi = %s, year = %s, 
+                            millage = %s, transmission = %s, seat_capacity = %s, gambar = %s,
+                            last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
+                        WHERE listing_url = %s
+                    """
+                    self.cursor.execute(update_query, (
+                        car_data['price'], old_price, car_data['informasi_iklan'], car_data['lokasi'],
+                        car_data['year'], car_data['millage'], car_data['transmission'], car_data['seat_capacity'],
+                        car_data['gambar'], car_data['listing_url']
+                    ))
+                else:
+                    # Jika harga tidak berubah, hanya update data lainnya
+                    update_query = """
+                        UPDATE cars
+                        SET informasi_iklan = %s, lokasi = %s, year = %s, millage = %s, transmission = %s, 
+                            seat_capacity = %s, gambar = %s, last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
+                        WHERE listing_url = %s
+                    """
+                    self.cursor.execute(update_query, (
+                        car_data['informasi_iklan'], car_data['lokasi'], car_data['year'], car_data['millage'],
+                        car_data['transmission'], car_data['seat_capacity'], car_data['gambar'], car_data['listing_url']
+                    ))
+
             else:  # Data belum ada, insert
                 insert_query = """
                     INSERT INTO cars (listing_url, brand, model, variant, informasi_iklan, lokasi, price,
-                                      year, millage, transmission, seat_capacity, gambar)
+                                    year, millage, transmission, seat_capacity, gambar)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 self.cursor.execute(insert_query, (
                     car_data['listing_url'], car_data['brand'], car_data['model'], car_data['variant'],
                     car_data['informasi_iklan'], car_data['lokasi'], car_data['price'], car_data['year'],
-                    car_data['millage'], car_data['transmission'],
-                    car_data['seat_capacity'], car_data['gambar']
+                    car_data['millage'], car_data['transmission'], car_data['seat_capacity'], car_data['gambar']
                 ))
+            
+            # Commit perubahan ke database
             self.conn.commit()
+
         except Exception as e:
             self.conn.rollback()
             logging.error(f"❌ Error menyimpan atau memperbarui data ke database: {e}")

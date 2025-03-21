@@ -30,7 +30,7 @@ class CarlistMyService:
         
         self.batch_size = 25   
         self.listing_count = 0  
-
+    
     def init_driver(self):
         logging.info("Menginisialisasi ChromeDriver...")
         options = Options()
@@ -52,6 +52,98 @@ class CarlistMyService:
         self.driver.set_page_load_timeout(120)
         logging.info("ChromeDriver berhasil diinisialisasi.")
 
+
+    def convert_price_to_integer(self, price_string):
+        """Mengonversi harga dalam format string (misalnya "RM 38,800") ke tipe data INTEGER"""
+        if not price_string:  # Cek jika price_string adalah None atau string kosong
+            return None
+        
+        price_clean = re.sub(r"[^\d]", "", price_string)
+        
+        try:
+            return int(price_clean)  # Konversi menjadi integer
+        except ValueError:
+            return None
+
+    def scrape_detail(self, detail_url):
+        if self.stop_flag:
+            logging.info("⚠️ Scraping dihentikan sebelum mengambil detail.")
+            return None
+
+        if not self.driver:
+            self.init_driver()
+
+        max_retries = 3
+        attempt = 0
+        while attempt < max_retries:
+            logging.info(f"🔍 Mengambil detail dari: {detail_url}")
+            try:
+                self.driver.get(detail_url)
+                time.sleep(5)
+                break
+            except Exception as e:
+                if "HTTPConnectionPool" in str(e):
+                    attempt += 1
+                    logging.error(f"❌ Error HTTPConnectionPool saat memuat halaman detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    self.quit_driver()
+                    time.sleep(5)
+                    self.init_driver()
+                else:
+                    logging.error(f"❌ Error lain saat memuat halaman detail {detail_url}: {e}. Tidak dilakukan retry.")
+                    self.debug_dump("scrape_detail_error")
+                    return None
+        else:
+            logging.error(f"❌ Gagal memuat halaman detail {detail_url} setelah {max_retries} percobaan.")
+            return None
+
+        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+
+        def extract(selector):
+            element = soup.select_one(selector)
+            return element.text.strip() if element else None
+
+        brand = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(3) > a > span")
+        model = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(4) > a > span")
+        variant = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(5) > a > span")
+
+        informasi_iklan = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--masthead.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-2\\@mobile > div > div > div:nth-child(1) > span.u-color-muted.u-text-7.u-hide\\@mobile")
+        
+        lokasi_part1 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
+        lokasi_part2 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
+        lokasi = " ".join(filter(None, [lokasi_part1, lokasi_part2]))
+
+        gambar_container = soup.select_one("#details-gallery > div > div")
+        gambar = []
+        if gambar_container:
+            img_tags = gambar_container.find_all("img")
+            for img in img_tags:
+                src = img.get("src")
+                if src:
+                    gambar.append(src)
+
+        price_string = extract("#details-gallery > div > div > div.c-gallery--hero-img.u-relative > div.c-gallery__item > div.c-gallery__item-details.u-padding-lg.u-padding-md\\@mobile.u-absolute.u-bottom-right.u-bottom-left.u-zindex-1 > div > div.listing__item-price > h3")
+        price = self.convert_price_to_integer(price_string)
+
+        year = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(2) > div > div > div > span.u-text-bold.u-block")
+        millage = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(3) > div > div > div > span.u-text-bold.u-block")
+        transmission = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(6) > div > div > div > span.u-text-bold.u-block")
+        seat_capacity = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(7) > div > div > div > span.u-text-bold.u-block")
+
+        detail = {
+            "listing_url": detail_url,
+            "brand": brand,
+            "model": model,
+            "variant": variant,
+            "informasi_iklan": informasi_iklan,
+            "lokasi": lokasi,
+            "price": price,  # Gunakan harga yang sudah dikonversi
+            "year": year,
+            "millage": millage,
+            "transmission": transmission,
+            "seat_capacity": seat_capacity,
+            "gambar": gambar
+        }
+        return detail
 
     def quit_driver(self):
         """Menutup driver untuk membebaskan resource."""
@@ -115,84 +207,6 @@ class CarlistMyService:
                     self.debug_dump("get_listing_urls_error")
                     return []
         return []
-
-    def scrape_detail(self, detail_url):
-        if self.stop_flag:
-            logging.info("⚠️ Scraping dihentikan sebelum mengambil detail.")
-            return None
-
-        if not self.driver:
-            self.init_driver()
-
-        max_retries = 3
-        attempt = 0
-        while attempt < max_retries:
-            logging.info(f"🔍 Mengambil detail dari: {detail_url}")
-            try:
-                self.driver.get(detail_url)
-                time.sleep(3)
-                break
-            except Exception as e:
-                if "HTTPConnectionPool" in str(e):
-                    attempt += 1
-                    logging.error(f"❌ Error HTTPConnectionPool saat memuat halaman detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
-                    self.quit_driver()
-                    time.sleep(5)
-                    self.init_driver()
-                else:
-                    logging.error(f"❌ Error lain saat memuat halaman detail {detail_url}: {e}. Tidak dilakukan retry.")
-                    self.debug_dump("scrape_detail_error")
-                    return None
-        else:
-            logging.error(f"❌ Gagal memuat halaman detail {detail_url} setelah {max_retries} percobaan.")
-            return None
-
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
-
-        def extract(selector):
-            element = soup.select_one(selector)
-            return element.text.strip() if element else None
-
-        brand = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(3) > a > span")
-        model = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(4) > a > span")
-        variant = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--breadcrumb.u-margin-top-xs.u-hide\\@mobile.js-part-breadcrumb > div > ul > li:nth-child(5) > a > span")
-
-        informasi_iklan = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--masthead.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-2\\@mobile > div > div > div:nth-child(1) > span.u-color-muted.u-text-7.u-hide\\@mobile")
-        
-        lokasi_part1 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
-        lokasi_part2 = extract("#listing-detail > section:nth-child(2) > div > div > div.c-sidebar.c-sidebar--top.u-width-2\\/6.u-width-1\\@mobile.u-padding-right-sm.u-padding-left-md.u-padding-top-md.u-padding-top-none\\@mobile.u-flex.u-flex--column.u-flex--column\\@mobile.u-order-first\\@mobile > div.c-card.c-card--ctr.u-margin-ends-sm.u-order-last\\@mobile > div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
-        lokasi = " ".join(filter(None, [lokasi_part1, lokasi_part2]))
-
-        gambar_container = soup.select_one("#details-gallery > div > div")
-        gambar = []
-        if gambar_container:
-            img_tags = gambar_container.find_all("img")
-            for img in img_tags:
-                src = img.get("src")
-                if src:
-                    gambar.append(src)
-
-        price = extract("#details-gallery > div > div > div.c-gallery--hero-img.u-relative > div.c-gallery__item > div.c-gallery__item-details.u-padding-lg.u-padding-md\\@mobile.u-absolute.u-bottom-right.u-bottom-left.u-zindex-1 > div > div.listing__item-price > h3")
-        year = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(2) > div > div > div > span.u-text-bold.u-block")
-        millage = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(3) > div > div > div > span.u-text-bold.u-block")
-        transmission = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(6) > div > div > div > span.u-text-bold.u-block")
-        seat_capacity = extract("#listing-detail > section.c-section--content.u-bg-white.u-padding-top-md.u-padding-bottom-xs.u-flex\\@mobile.u-flex--column\\@mobile > section.c-section.c-section--key-details.u-margin-ends-lg.u-margin-ends-sm\\@mobile.u-order-3\\@mobile > div > div > div > div > div.owl-stage-outer > div > div:nth-child(7) > div > div > div > span.u-text-bold.u-block")
-
-        detail = {
-            "listing_url": detail_url,
-            "brand": brand,
-            "model": model,
-            "variant": variant,
-            "informasi_iklan": informasi_iklan,
-            "lokasi": lokasi,
-            "price": price,
-            "year": year,
-            "millage": millage,
-            "transmission": transmission,
-            "seat_capacity": seat_capacity,
-            "gambar": gambar
-        }
-        return detail
 
     def scrape_all_brands(self, start_brand=None, start_page=1):
         """Scrape semua brand berdasarkan file CSV dengan opsi batch untuk meminimalkan penggunaan memori."""
@@ -276,37 +290,59 @@ class CarlistMyService:
         logging.info("🔄 Scraping direset dan siap dimulai kembali.")
 
     def save_to_db(self, car_data):
-        """Menyimpan atau memperbarui data mobil ke database PostgreSQL."""
+        """Menyimpan atau memperbarui data mobil ke database PostgreSQL dengan mencatat perubahan harga."""
         try:
-            select_query = "SELECT id FROM cars WHERE listing_url = %s"
+            select_query = "SELECT id, price, previous_price FROM cars WHERE listing_url = %s"
             self.cursor.execute(select_query, (car_data['listing_url'],))
             result = self.cursor.fetchone()
 
             if result:  # Data sudah ada, update
-                update_query = """
-                    UPDATE cars
-                    SET price = %s, informasi_iklan = %s, lokasi = %s, year = %s, millage = %s,
-                         transmission = %s, seat_capacity = %s, gambar = %s,
-                        last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
-                    WHERE listing_url = %s
-                """
-                self.cursor.execute(update_query, (
-                    car_data['price'], car_data['informasi_iklan'], car_data['lokasi'],
-                    car_data['year'], car_data['millage'],
-                    car_data['transmission'], car_data['seat_capacity'], car_data['gambar'],
-                    car_data['listing_url']
-                ))
+                car_id, current_price, previous_price = result
+
+                # Cek jika harga berubah
+                if car_data['price'] != current_price:
+                    # Simpan perubahan harga ke tabel price_history
+                    self.cursor.execute("""
+                        INSERT INTO price_history (car_id, old_price, new_price)
+                        VALUES (%s, %s, %s)
+                    """, (car_id, current_price, car_data['price']))
+
+                    # Update kolom previous_price
+                    update_query = """
+                        UPDATE cars
+                        SET price = %s, previous_price = %s, informasi_iklan = %s, lokasi = %s, year = %s, 
+                            millage = %s, transmission = %s, seat_capacity = %s, gambar = %s,
+                            last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
+                        WHERE listing_url = %s
+                    """
+                    self.cursor.execute(update_query, (
+                        car_data['price'], current_price, car_data['informasi_iklan'], car_data['lokasi'],
+                        car_data['year'], car_data['millage'], car_data['transmission'], car_data['seat_capacity'],
+                        car_data['gambar'], car_data['listing_url']
+                    ))
+                else:
+                    # Jika harga tidak berubah, update informasi lainnya
+                    update_query = """
+                        UPDATE cars
+                        SET informasi_iklan = %s, lokasi = %s, year = %s, millage = %s,
+                            transmission = %s, seat_capacity = %s, gambar = %s,
+                            last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
+                        WHERE listing_url = %s
+                    """
+                    self.cursor.execute(update_query, (
+                        car_data['informasi_iklan'], car_data['lokasi'], car_data['year'], car_data['millage'],
+                        car_data['transmission'], car_data['seat_capacity'], car_data['gambar'], car_data['listing_url']
+                    ))
             else:  # Data belum ada, insert
                 insert_query = """
                     INSERT INTO cars (listing_url, brand, model, variant, informasi_iklan, lokasi, price,
-                                    year, millage, transmission, seat_capacity, gambar)
+                                year, millage, transmission, seat_capacity, gambar)
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """
                 self.cursor.execute(insert_query, (
                     car_data['listing_url'], car_data['brand'], car_data['model'], car_data['variant'],
                     car_data['informasi_iklan'], car_data['lokasi'], car_data['price'], car_data['year'],
-                    car_data['millage'], car_data['transmission'],
-                    car_data['seat_capacity'], car_data['gambar']
+                    car_data['millage'], car_data['transmission'], car_data['seat_capacity'], car_data['gambar']
                 ))
             self.conn.commit()
         except Exception as e:
