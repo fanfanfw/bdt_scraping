@@ -1,5 +1,5 @@
 import time
-import os
+import logging
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -7,6 +7,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from scrap_service.listing_tracker_service_mudahmy.database import get_database_connection
+
+logger = logging.getLogger("mudahmy_tracker")
+logger.setLevel(logging.INFO)
+
+console_handler = logging.StreamHandler()  
+console_handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(message)s')
+console_handler.setFormatter(formatter)
+
+logger.handlers = []
+logger.addHandler(console_handler)
 
 class ListingTrackerMudahmy:
     def __init__(self, batch_size=10):
@@ -31,7 +43,6 @@ class ListingTrackerMudahmy:
         )
 
         driver = webdriver.Chrome(options=chrome_options)
-        # Sembunyikan navigator.webdriver
         driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
             "source": """
                 Object.defineProperty(navigator, 'webdriver', {
@@ -54,7 +65,6 @@ class ListingTrackerMudahmy:
         Jika ditemukan, kita anggap masih active.
         """
         try:
-            # Beberapa situs butuh scroll sedikit agar elemen ter-load (lazy load)
             driver.execute_script("window.scrollTo(0, 300);")
             time.sleep(2)
 
@@ -68,12 +78,11 @@ class ListingTrackerMudahmy:
     def track_listings(self):
         conn = get_database_connection()
         if not conn:
-            print("Koneksi DB gagal, hentikan proses tracking.")
+            logger.error("Koneksi DB gagal, hentikan proses tracking.")
             return
 
         cursor = conn.cursor()
 
-        # Ambil SEMUA data berstatus active sekaligus (hindari LIMIT OFFSET).
         cursor.execute("""
             SELECT id, listing_url
             FROM cars_mudahmy
@@ -83,9 +92,8 @@ class ListingTrackerMudahmy:
         all_records = cursor.fetchall()
 
         total_active = len(all_records)
-        print(f"Total listing aktif: {total_active}")
+        logger.info(f"Total listing aktif: {total_active}")
 
-        # Proses per batch di memori
         start_index = 0
         batch_number = 0
 
@@ -94,20 +102,23 @@ class ListingTrackerMudahmy:
             batch_records = all_records[start_index:end_index]
             batch_number += 1
 
-            print(f"\nMemproses batch ke-{batch_number} (index {start_index} s/d {end_index-1}), "
-                  f"jumlah={len(batch_records)}...")
+            logger.info(f"\nMemproses batch ke-{batch_number} (index {start_index} s/d {end_index-1}), "
+                        f"jumlah={len(batch_records)}...")
 
             driver = self._init_driver()
 
             try:
                 for row in batch_records:
                     car_id, url = row
+                    # LOG URL
+                    logger.info(f"> ID={car_id} => Memeriksa {url}")
+
                     try:
                         driver.get(url)
-                        time.sleep(3) 
+                        time.sleep(3)
 
                         if self._is_redirected(driver):
-                            print(f"> ID={car_id} => redirect -> 'sold'")
+                            logger.info(f"> ID={car_id} => redirect -> 'sold'")
                             cursor.execute("""
                                 UPDATE cars_mudahmy
                                 SET status = 'sold', sold_at = NOW()
@@ -115,9 +126,9 @@ class ListingTrackerMudahmy:
                             """, (car_id,))
                         else:
                             if self._check_h1_active(driver):
-                                print(f"> ID={car_id} => masih active (H1 ditemukan)")
+                                logger.info(f"> ID={car_id} => masih active (H1 ditemukan)")
                             else:
-                                print(f"> ID={car_id} => tidak ada H1 -> 'sold'")
+                                logger.info(f"> ID={car_id} => tidak ada H1 -> 'sold'")
                                 driver.save_screenshot(f"screenshot_{car_id}.png")
                                 with open(f"page_source_{car_id}.html", "w", encoding="utf-8") as f:
                                     f.write(driver.page_source)
@@ -131,7 +142,7 @@ class ListingTrackerMudahmy:
                         conn.commit()
 
                     except Exception as e:
-                        print(f"Terjadi error saat cek ID={car_id}: {e}")
+                        logger.error(f"Terjadi error saat cek ID={car_id}: {e}")
                         cursor.execute("""
                             UPDATE cars_mudahmy
                             SET status = 'sold', sold_at = NOW()
@@ -146,4 +157,4 @@ class ListingTrackerMudahmy:
 
         cursor.close()
         conn.close()
-        print("\nProses tracking selesai.")
+        logger.info("\nProses tracking selesai.")
