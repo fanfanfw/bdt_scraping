@@ -1,11 +1,14 @@
 import time
 import logging
+import random
+import os
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, WebDriverException
 
 from .database import get_database_connection
 
@@ -18,6 +21,8 @@ console_handler.setFormatter(formatter)
 
 logger.handlers = []
 logger.addHandler(console_handler)
+
+DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 
 class ListingTrackerCarlistmy:
     def __init__(self, batch_size=10):
@@ -77,8 +82,8 @@ class ListingTrackerCarlistmy:
         try:
             conn = get_database_connection()
             cursor = conn.cursor()
-            query = """
-                UPDATE cars
+            query = f"""
+                UPDATE {DB_TABLE_PRIMARY}
                 SET status = %s, sold_at = %s, last_scraped_at = %s
                 WHERE id = %s
             """
@@ -93,94 +98,53 @@ class ListingTrackerCarlistmy:
             if conn:
                 conn.close()
 
-    def _process_listing(self, driver, car_id, listing_url):
-        logger.info(f"> ID={car_id} => Memeriksa {listing_url}")
-        try:
-            driver.get(listing_url)
-            time.sleep(3)
-            
-            self._close_cookies_popup(driver)
-            
-            driver.execute_script("window.scrollTo(0, 1000);")
-            time.sleep(3)
-            
-            try:
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, self.sold_selector))
-                )
-                found_text = driver.find_element(By.CSS_SELECTOR, self.sold_selector).text.strip()
-                if self.sold_text_indicator in found_text:
-                    logger.info(f"> ID={car_id} => terdeteksi SOLD (\"{found_text}\")")
-                    self._update_car_info(car_id, "sold", datetime.now())
-                    return
-            except:
-                pass
-            
-            try:
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, self.active_selector))
-                )
-                logger.info(f"> ID={car_id} => masih active (judul iklan ditemukan)")
-                return
-            except:
-                pass
-            
-            page_source = driver.page_source.lower()
-            if "this car has already been sold." in page_source:
-                logger.info(f"> ID={car_id} => terdeteksi SOLD (fallback by page_source)")
-                self._update_car_info(car_id, "sold", datetime.now())
-            else:
-                # Misal kita tandai 'unknown' agar tidak salah
-                logger.info(f"> ID={car_id} => fallback => tidak ditemukan sold, tandai 'unknown'")
-                # self._update_car_info(car_id, "unknown", None)
-
-            # (Jika Anda ingin langsung sold, boleh)
-            # else:
-            #     logger.info(f"> ID={car_id} => tidak ada indikasi active, dianggap SOLD.")
-            #     self._update_car_info(car_id, "sold", datetime.now())
-
-        except Exception as e:
-            logger.error(f"Error processing listing ID={car_id}, URL={listing_url}: {e}")
-            self._update_car_info(car_id, "sold", datetime.now())
-
-
-    def track_listings(self):
+    def track_listings(self, start_id=1):
         """
-        Fungsi utama: mengambil semua listing 'active', memprosesnya batch per batch.
+        Fungsi utama: mengambil semua listing berstatus 'active' maupun 'unknown'
+        mulai dari ID tertentu, lalu memprosesnya batch per batch.
         """
         conn = None
         try:
             conn = get_database_connection()
             cursor = conn.cursor()
 
-            # Ambil SEMUA data yg status='active'
-            cursor.execute("SELECT id, listing_url FROM cars WHERE status = 'active' ORDER BY id")
+            # Ambil SEMUA data yg status='active' atau 'unknown' mulai dari ID yang ditentukan
+            cursor.execute(f"""
+                SELECT id, listing_url, status
+                FROM {DB_TABLE_PRIMARY}
+                WHERE (status = 'active' OR status = 'unknown')
+                AND id >= %s
+                ORDER BY id
+            """, (start_id,))
             all_records = cursor.fetchall()
             cursor.close()
 
-            total_active = len(all_records)
-            logger.info(f"Total listing aktif: {total_active}")
-            if total_active == 0:
+            total_listings = len(all_records)
+            unknown_count = sum(1 for r in all_records if r[2] == 'unknown')
+
+            logger.info(f"Total listing berstatus active/unknown (mulai ID {start_id}): {total_listings}")
+            logger.info(f"Di antaranya, ada {unknown_count} listing dengan status 'unknown'.")
+
+            if total_listings == 0:
                 return
 
-            # Bagi data menjadi batch
             start_index = 0
             batch_number = 0
 
-            while start_index < total_active:
+            # Bagi data menjadi batch
+            while start_index < total_listings:
                 end_index = start_index + self.batch_size
                 batch_records = all_records[start_index:end_index]
                 batch_number += 1
 
-                logger.info(f"\nMemproses batch ke-{batch_number} (index {start_index} s/d {end_index-1}), jumlah={len(batch_records)}...")
+                logger.info(f"\nMemproses batch ke-{batch_number} (index {start_index} s/d {end_index-1}), "
+                            f"jumlah={len(batch_records)}...")
 
-                # Inisialisasi driver untuk batch ini
                 driver = self._init_driver()
-
                 try:
                     for record in batch_records:
-                        car_id, listing_url = record
-                        self._process_listing(driver, car_id, listing_url)
+                        car_id, listing_url, current_status = record  # <-- tambahan
+                        self._process_listing_with_retry(driver, car_id, listing_url, current_status)
                 finally:
                     driver.quit()
 
@@ -192,3 +156,76 @@ class ListingTrackerCarlistmy:
             if conn:
                 conn.close()
             logger.info("Proses tracking selesai.")
+
+
+    def _process_listing_with_retry(self, driver, car_id, listing_url, current_status, max_retries=3):
+        """
+        Mencoba memproses listing hingga max_retries kali jika terjadi exception.
+        Jika setelah max_retries kali tetap error, skip listing ini.
+        """
+        for attempt in range(max_retries):
+            try:
+                self._process_listing(driver, car_id, listing_url, current_status)  # <-- tambahan
+                return True
+            except (TimeoutException, WebDriverException, Exception) as e:
+                logger.error(f"Attempt {attempt+1} gagal memproses ID={car_id}, URL={listing_url}: {e}")
+                if attempt < max_retries - 1:
+                    logger.info("Menunggu beberapa detik sebelum retry berikutnya...")
+                    time.sleep(3)
+                else:
+                    logger.error(f"Gagal memproses ID={car_id} setelah {max_retries} kali percobaan. Skip ID ini.")
+                    return False
+
+
+    def _process_listing(self, driver, car_id, listing_url, current_status):  # <-- tambahan
+        """
+        Proses inti untuk membuka URL dan menentukan apakah listing 'sold' atau 'active'.
+        Apabila terjadi error di sini, di-raise ke atas agar bisa ditangani oleh mekanisme retry.
+        """
+        logger.info(f"> ID={car_id} => Memeriksa {listing_url}")
+
+        driver.get(listing_url)
+        time.sleep(3)
+
+        self._close_cookies_popup(driver)
+        driver.execute_script("window.scrollTo(0, 1000);")
+        time.sleep(3)
+
+        # Cek apakah ada indikator 'sold'
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, self.sold_selector))
+            )
+            found_text = driver.find_element(By.CSS_SELECTOR, self.sold_selector).text.strip()
+            if self.sold_text_indicator in found_text:
+                logger.info(f"> ID={car_id} => terdeteksi SOLD (\"{found_text}\")")
+                self._update_car_info(car_id, "sold", datetime.now())
+                return
+        except:
+            pass
+
+        # Cek apakah masih active
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, self.active_selector))
+            )
+            logger.info(f"> ID={car_id} => masih active (judul iklan ditemukan)")
+            # Jika awalnya unknown, update jadi active
+            if current_status == "unknown":
+                self._update_car_info(car_id, "active", None)
+            return
+        except:
+            pass
+
+        page_source = driver.page_source.lower()
+        if "this car has already been sold." in page_source:
+            logger.info(f"> ID={car_id} => terdeteksi SOLD (fallback by page_source)")
+            self._update_car_info(car_id, "sold", datetime.now())
+        else:
+            # Jika sudah unknown, biarkan tetap unknown
+            if current_status == "unknown":
+                logger.info(f"> ID={car_id} => fallback => status sudah unknown, biarkan tetap unknown.")
+            else:
+                logger.info(f"> ID={car_id} => fallback => tidak ditemukan sold, tandai 'unknown'")
+                self._update_car_info(car_id, "unknown", None)
+
