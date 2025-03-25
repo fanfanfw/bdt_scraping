@@ -11,26 +11,33 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
-from .database import get_connection
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+from .database import get_connection
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-INPUT_FILE = "scrap_service/carlistmy_service/storage/input_files/carlistMY_scraplist.csv"
+DB_TABLE_SCRAP = os.getenv("DB_TABLE_SCRAP", "cars_scrap")
+DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
+DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history")
+
+INPUT_FILE = os.getenv("INPUT_FILE", "carlistmy_brands.csv")
 
 class CarlistMyService:
     def __init__(self):
         self.driver = None
         self.stop_flag = False
+        
+        # Koneksi DB & cursor
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
         
-        self.batch_size = 25   
-        self.listing_count = 0  
-    
+        self.batch_size = 25
+        self.listing_count = 0
+
     def init_driver(self):
         logging.info("Menginisialisasi ChromeDriver...")
         options = Options()
@@ -52,16 +59,13 @@ class CarlistMyService:
         self.driver.set_page_load_timeout(120)
         logging.info("ChromeDriver berhasil diinisialisasi.")
 
-
     def convert_price_to_integer(self, price_string):
-        """Mengonversi harga dalam format string (misalnya "RM 38,800") ke tipe data INTEGER"""
-        if not price_string:  # Cek jika price_string adalah None atau string kosong
+        """Mengonversi harga dalam format string (misalnya 'RM 38,800') ke tipe data INTEGER"""
+        if not price_string:
             return None
-        
         price_clean = re.sub(r"[^\d]", "", price_string)
-        
         try:
-            return int(price_clean)  # Konversi menjadi integer
+            return int(price_clean)
         except ValueError:
             return None
 
@@ -84,7 +88,10 @@ class CarlistMyService:
             except Exception as e:
                 if "HTTPConnectionPool" in str(e):
                     attempt += 1
-                    logging.error(f"❌ Error HTTPConnectionPool saat memuat halaman detail {detail_url}: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    logging.error(
+                        f"❌ Error HTTPConnectionPool saat memuat halaman detail {detail_url}: {e}. "
+                        f"Mencoba lagi ({attempt}/{max_retries})..."
+                    )
                     self.quit_driver()
                     time.sleep(5)
                     self.init_driver()
@@ -136,7 +143,7 @@ class CarlistMyService:
             "variant": variant,
             "informasi_iklan": informasi_iklan,
             "lokasi": lokasi,
-            "price": price,  # Gunakan harga yang sudah dikonversi
+            "price": price,
             "year": year,
             "millage": millage,
             "transmission": transmission,
@@ -155,7 +162,7 @@ class CarlistMyService:
             except Exception as e:
                 logging.error(f"Gagal menutup ChromeDriver: {e}")
             self.driver = None
-                        
+
     def debug_dump(self, prefix):
         """Simpan screenshot dan page_source untuk keperluan debugging."""
         timestamp = int(time.time())
@@ -198,7 +205,10 @@ class CarlistMyService:
             except Exception as e:
                 if "HTTPConnectionPool" in str(e):
                     attempt += 1
-                    logging.error(f"❌ Error HTTPConnectionPool saat mengambil listing URLs: {e}. Mencoba lagi ({attempt}/{max_retries})...")
+                    logging.error(
+                        f"❌ Error HTTPConnectionPool saat mengambil listing URLs: {e}. "
+                        f"Mencoba lagi ({attempt}/{max_retries})..."
+                    )
                     self.quit_driver()
                     time.sleep(5)
                     self.init_driver()
@@ -214,31 +224,34 @@ class CarlistMyService:
             self.reset_scraping()
             df = pd.read_csv(INPUT_FILE)
             start_scraping = False if start_brand else True
-            
+
             for _, row in df.iterrows():
                 brand = row["brand"]
                 base_brand_url = row["url"]
-                
+
                 if not start_scraping:
                     if brand == start_brand:
                         start_scraping = True
                     else:
-                        continue  
-                
+                        continue
+
                 logging.info(f"🚀 Mulai scraping brand: {brand}")
                 page_number = start_page if brand == start_brand else 1
-                
+
                 while not self.stop_flag:
                     try:
                         # Format URL dengan page_number
-                        paginated_url = re.sub(r"(page_number=)\d+", lambda m: m.group(1) + str(page_number), base_brand_url)
+                        paginated_url = re.sub(r"(page_number=)\d+",
+                                               lambda m: m.group(1) + str(page_number),
+                                               base_brand_url)
                         logging.info(f"📄 Scraping halaman {page_number}: {paginated_url}")
-                        
+
                         listing_urls = self.get_listing_urls(paginated_url)
                         if not listing_urls:
-                            logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. Menghentikan scraping brand: {brand}")
+                            logging.info(f"✅ Tidak ditemukan listing URLs pada halaman {page_number}. "
+                                         f"Menghentikan scraping brand: {brand}")
                             break
-                        
+
                         for listing_url in listing_urls:
                             if self.stop_flag:
                                 break
@@ -252,7 +265,7 @@ class CarlistMyService:
                                 if self.listing_count >= self.batch_size:
                                     logging.info(f"Batch {self.batch_size} listing tercapai, reinit driver...")
                                     self.quit_driver()
-                                    time.sleep(3)  
+                                    time.sleep(3)
                                     self.init_driver()
                                     self.listing_count = 0
 
@@ -260,25 +273,21 @@ class CarlistMyService:
 
                     except Exception as e:
                         logging.error(f"❌ Error saat scraping halaman {page_number}: {e}")
-                        
-                        # Jika error karena timeout, restart driver dan lanjut dari halaman terakhir
                         if "timeout" in str(e).lower():
-                            logging.warning(f"⚠️ Timeout terjadi. Restarting ChromeDriver...")
+                            logging.warning("⚠️ Timeout terjadi. Restarting ChromeDriver...")
                             self.quit_driver()
                             time.sleep(5)
                             self.init_driver()
                             logging.info(f"Melanjutkan scraping dari halaman {page_number} untuk brand {brand}...")
-
                         else:
                             logging.error("❌ Error fatal, menghentikan scraping brand ini.")
-                            break  # Lewati brand jika error terlalu fatal
-                
+                            break  
+
             logging.info("✅ Proses scraping semua brand selesai.")
         except Exception as e:
             logging.error(f"❌ Error saat scraping semua brand: {e}")
         finally:
             self.quit_driver()
-
 
     def stop_scraping(self):
         logging.info("⚠️ Permintaan untuk menghentikan scraping diterima.")
@@ -290,64 +299,200 @@ class CarlistMyService:
         logging.info("🔄 Scraping direset dan siap dimulai kembali.")
 
     def save_to_db(self, car_data):
-        """Menyimpan atau memperbarui data mobil ke database PostgreSQL dengan mencatat perubahan harga."""
+        """
+        Menyimpan atau memperbarui data mobil ke database PostgreSQL (ke tabel DB_TABLE_SCRAP),
+        sekaligus mencatat perubahan harga jika ada (di tabel DB_TABLE_HISTORY_PRICE).
+        """
         try:
-            select_query = "SELECT id, price, previous_price FROM cars WHERE listing_url = %s"
+            select_query = f"SELECT id, price, previous_price FROM {DB_TABLE_SCRAP} WHERE listing_url = %s"
             self.cursor.execute(select_query, (car_data['listing_url'],))
             result = self.cursor.fetchone()
 
-            if result:  # Data sudah ada, update
+            if result: 
                 car_id, current_price, previous_price = result
 
                 # Cek jika harga berubah
                 if car_data['price'] != current_price:
-                    # Simpan perubahan harga ke tabel price_history
-                    self.cursor.execute("""
-                        INSERT INTO price_history (car_id, old_price, new_price)
+                    # Simpan perubahan harga ke price_history
+                    insert_history = f"""
+                        INSERT INTO {DB_TABLE_HISTORY_PRICE} (car_id, old_price, new_price)
                         VALUES (%s, %s, %s)
-                    """, (car_id, current_price, car_data['price']))
+                    """
+                    self.cursor.execute(insert_history, (car_id, current_price, car_data['price']))
 
-                    # Update kolom previous_price
-                    update_query = """
-                        UPDATE cars
-                        SET price = %s, previous_price = %s, informasi_iklan = %s, lokasi = %s, year = %s, 
-                            millage = %s, transmission = %s, seat_capacity = %s, gambar = %s,
-                            last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
+                    update_query = f"""
+                        UPDATE {DB_TABLE_SCRAP}
+                        SET price = %s,
+                            previous_price = %s,
+                            informasi_iklan = %s,
+                            lokasi = %s,
+                            year = %s,
+                            millage = %s,
+                            transmission = %s,
+                            seat_capacity = %s,
+                            gambar = %s,
+                            last_scraped_at = CURRENT_TIMESTAMP,
+                            version = version + 1
                         WHERE listing_url = %s
                     """
                     self.cursor.execute(update_query, (
-                        car_data['price'], current_price, car_data['informasi_iklan'], car_data['lokasi'],
-                        car_data['year'], car_data['millage'], car_data['transmission'], car_data['seat_capacity'],
+                        car_data['price'], current_price,
+                        car_data['informasi_iklan'], car_data['lokasi'], car_data['year'],
+                        car_data['millage'], car_data['transmission'], car_data['seat_capacity'],
                         car_data['gambar'], car_data['listing_url']
                     ))
                 else:
-                    # Jika harga tidak berubah, update informasi lainnya
-                    update_query = """
-                        UPDATE cars
-                        SET informasi_iklan = %s, lokasi = %s, year = %s, millage = %s,
-                            transmission = %s, seat_capacity = %s, gambar = %s,
-                            last_scraped_at = CURRENT_TIMESTAMP, version = version + 1
+                    update_query = f"""
+                        UPDATE {DB_TABLE_SCRAP}
+                        SET informasi_iklan = %s,
+                            lokasi = %s,
+                            year = %s,
+                            millage = %s,
+                            transmission = %s,
+                            seat_capacity = %s,
+                            gambar = %s,
+                            last_scraped_at = CURRENT_TIMESTAMP,
+                            version = version + 1
                         WHERE listing_url = %s
                     """
                     self.cursor.execute(update_query, (
-                        car_data['informasi_iklan'], car_data['lokasi'], car_data['year'], car_data['millage'],
-                        car_data['transmission'], car_data['seat_capacity'], car_data['gambar'], car_data['listing_url']
+                        car_data['informasi_iklan'], car_data['lokasi'],
+                        car_data['year'], car_data['millage'],
+                        car_data['transmission'], car_data['seat_capacity'],
+                        car_data['gambar'], car_data['listing_url']
                     ))
-            else:  # Data belum ada, insert
-                insert_query = """
-                    INSERT INTO cars (listing_url, brand, model, variant, informasi_iklan, lokasi, price,
-                                year, millage, transmission, seat_capacity, gambar)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            else:  
+                insert_query = f"""
+                    INSERT INTO {DB_TABLE_SCRAP}
+                        (listing_url, brand, model, variant, informasi_iklan, lokasi, price,
+                         year, millage, transmission, seat_capacity, gambar)
+                    VALUES
+                        (%s, %s, %s, %s, %s, %s, %s,
+                         %s, %s, %s, %s, %s)
                 """
                 self.cursor.execute(insert_query, (
                     car_data['listing_url'], car_data['brand'], car_data['model'], car_data['variant'],
-                    car_data['informasi_iklan'], car_data['lokasi'], car_data['price'], car_data['year'],
-                    car_data['millage'], car_data['transmission'], car_data['seat_capacity'], car_data['gambar']
+                    car_data['informasi_iklan'], car_data['lokasi'], car_data['price'],
+                    car_data['year'], car_data['millage'], car_data['transmission'],
+                    car_data['seat_capacity'], car_data['gambar']
                 ))
             self.conn.commit()
         except Exception as e:
             self.conn.rollback()
             logging.error(f"❌ Error menyimpan atau memperbarui data ke database: {e}")
+
+    def sync_to_cars(self):
+        """
+        Method untuk sync data dari tabel DB_TABLE_SCRAP ke DB_TABLE_PRIMARY.
+        Jika listing_url sudah ada di DB_TABLE_PRIMARY, lakukan UPDATE.
+        Jika belum ada, lakukan INSERT.
+        """
+        logging.info(f"Memulai sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}...")
+
+        try:
+            fetch_query = f"SELECT * FROM {DB_TABLE_SCRAP};"
+            self.cursor.execute(fetch_query)
+            rows = self.cursor.fetchall()
+
+            col_names = [desc[0] for desc in self.cursor.description]
+            idx_url = col_names.index("listing_url")
+            idx_brand = col_names.index("brand")
+            idx_model = col_names.index("model")
+            idx_variant = col_names.index("variant")
+            idx_info_iklan = col_names.index("informasi_iklan")
+            idx_lokasi = col_names.index("lokasi")
+            idx_price = col_names.index("price")
+            idx_year = col_names.index("year")
+            idx_millage = col_names.index("millage")
+            idx_transmission = col_names.index("transmission")
+            idx_seat_capacity = col_names.index("seat_capacity")
+            idx_gambar = col_names.index("gambar")
+            idx_last_scraped_at = col_names.index("last_scraped_at")
+            idx_version = col_names.index("version")
+            idx_created_at = col_names.index("created_at")
+            idx_previous_price = col_names.index("previous_price")
+
+            for row in rows:
+                listing_url = row[idx_url]
+                
+                # Cek apakah listing_url sudah ada di tabel DB_TABLE_PRIMARY
+                check_query = f"SELECT id FROM {DB_TABLE_PRIMARY} WHERE listing_url = %s"
+                self.cursor.execute(check_query, (listing_url,))
+                result = self.cursor.fetchone()
+
+                if result:
+                    # UPDATE
+                    update_query = f"""
+                        UPDATE {DB_TABLE_PRIMARY}
+                        SET brand = %s,
+                            model = %s,
+                            variant = %s,
+                            informasi_iklan = %s,
+                            lokasi = %s,
+                            price = %s,
+                            year = %s,
+                            millage = %s,
+                            transmission = %s,
+                            seat_capacity = %s,
+                            gambar = %s,
+                            last_scraped_at = %s,
+                            version = %s,
+                            created_at = %s,
+                            previous_price = %s
+                        WHERE listing_url = %s
+                    """
+                    self.cursor.execute(update_query, (
+                        row[idx_brand],
+                        row[idx_model],
+                        row[idx_variant],
+                        row[idx_info_iklan],
+                        row[idx_lokasi],
+                        row[idx_price],
+                        row[idx_year],
+                        row[idx_millage],
+                        row[idx_transmission],
+                        row[idx_seat_capacity],
+                        row[idx_gambar],
+                        row[idx_last_scraped_at],
+                        row[idx_version],
+                        row[idx_created_at],
+                        row[idx_previous_price],
+                        listing_url,
+                    ))
+                else:
+                    # INSERT
+                    insert_query = f"""
+                        INSERT INTO {DB_TABLE_PRIMARY}
+                            (listing_url, brand, model, variant, informasi_iklan, lokasi,
+                             price, year, millage, transmission, seat_capacity, gambar, last_scraped_at, version, created_at, previous_price)
+                        VALUES
+                            (%s, %s, %s, %s, %s, %s,
+                             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    self.cursor.execute(insert_query, (
+                        listing_url,
+                        row[idx_brand],
+                        row[idx_model],
+                        row[idx_variant],
+                        row[idx_info_iklan],
+                        row[idx_lokasi],
+                        row[idx_price],
+                        row[idx_year],
+                        row[idx_millage],
+                        row[idx_transmission],
+                        row[idx_seat_capacity],
+                        row[idx_gambar],
+                        row[idx_last_scraped_at],
+                        row[idx_version],
+                        row[idx_created_at],
+                        row[idx_previous_price],
+                    ))
+
+            self.conn.commit()
+            logging.info(f"Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY} selesai.")
+        except Exception as e:
+            self.conn.rollback()
+            logging.error(f"❌ Error saat sinkronisasi data: {e}")
 
     def close(self):
         """Menutup driver dan koneksi database."""
