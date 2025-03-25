@@ -2,6 +2,7 @@ import time
 import logging
 from datetime import datetime
 import random
+import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -21,6 +22,8 @@ console_handler.setFormatter(formatter)
 
 logger.handlers = []
 logger.addHandler(console_handler)
+
+DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 
 class ListingTrackerMudahmy:
     def __init__(self, batch_size=10):
@@ -70,21 +73,82 @@ class ListingTrackerMudahmy:
         """
         return driver.current_url.startswith(self.redirect_url)
 
-    def _check_h1_active(self, driver):
+    def _check_h1_active_with_retry(self, driver, car_id, url, max_retries=3):
         """
-        Mengecek apakah ada elemen H1 di halaman iklan.
-        Jika ditemukan, kita anggap masih active.
+        Mengecek apakah ada elemen H1 di halaman iklan dengan maksimal retry tertentu.
+        Jika tidak ada H1 setelah max_retries kali, status akan diperbarui ke 'unknown'.
         """
-        try:
-            driver.execute_script("window.scrollTo(0, 300);")
-            time.sleep(2)
+        retry_count = 0
+        while retry_count < max_retries:
+            try:
+                driver.execute_script("window.scrollTo(0, 300);")
+                time.sleep(2)
 
-            WebDriverWait(driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#ad_view_ad_highlights > div > div > h1"))
+                WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#ad_view_ad_highlights > div > div > h1"))
+                )
+                logger.info(f"> ID={car_id} => H1 ditemukan, status aktif.")
+                return True  
+            except Exception:
+                retry_count += 1
+                logger.info(f"> ID={car_id} => Tidak ada H1, retry {retry_count}/{max_retries}...")
+
+                if retry_count >= max_retries:
+                    logger.info(f"> ID={car_id} => Gagal menemukan H1 setelah {max_retries} percobaan, update status 'unknown'")
+                    self._update_car_info(car_id, "unknown", None)  
+                    return False
+
+                time.sleep(3)  
+        return False
+
+    def _process_listing(self, driver, car_id, listing_url, current_status):  
+        """
+        Proses inti untuk membuka URL dan menentukan apakah listing 'sold' atau masih 'active'.
+        Apabila terjadi error di sini, di-raise ke atas supaya bisa ditangani oleh mekanisme retry.
+        """
+        logger.info(f"> ID={car_id} => Memeriksa {listing_url}")
+
+        driver.get(listing_url)
+        time.sleep(3)
+
+        self._close_cookies_popup(driver)
+        driver.execute_script("window.scrollTo(0, 1000);")
+        time.sleep(3)
+
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, self.sold_selector))
             )
-            return True
+            found_text = driver.find_element(By.CSS_SELECTOR, self.sold_selector).text.strip()
+            if self.sold_text_indicator in found_text:
+                logger.info(f"> ID={car_id} => terdeteksi SOLD (\"{found_text}\")")
+                self._update_car_info(car_id, "sold", datetime.now())
+                return
         except:
-            return False
+            pass
+
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, self.active_selector))
+            )
+            logger.info(f"> ID={car_id} => masih active (judul iklan ditemukan)")
+            if current_status == "unknown":
+                self._update_car_info(car_id, "active", None)
+            return
+        except:
+            pass
+
+        page_source = driver.page_source.lower()
+        if "this car has already been sold." in page_source:
+            logger.info(f"> ID={car_id} => terdeteksi SOLD (fallback by page_source)")
+            self._update_car_info(car_id, "sold", datetime.now())
+        else:
+            if current_status == "unknown":
+                logger.info(f"> ID={car_id} => fallback => status sudah unknown, biarkan tetap unknown.")
+            else:
+                logger.info(f"> ID={car_id} => fallback => tidak ditemukan sold, tandai 'unknown'")
+                self._update_car_info(car_id, "unknown", None)
+
 
     def random_delay(self, min_delay=3, max_delay=10):
         """ Menambahkan delay acak antara permintaan """
@@ -114,21 +178,26 @@ class ListingTrackerMudahmy:
 
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT id, listing_url
-            FROM cars
-            WHERE status = 'active' AND id >= %s
+        # Ambil data dengan status 'active' atau 'unknown' mulai dari ID yang ditentukan
+        cursor.execute(f"""
+            SELECT id, listing_url, status
+            FROM {DB_TABLE_PRIMARY}
+            WHERE (status = 'active' OR status = 'unknown') AND id >= %s
             ORDER BY id
         """, (start_id,))
         all_records = cursor.fetchall()
 
-        total_active = len(all_records)
+        # Hitung jumlah data 'active' dan 'unknown'
+        total_active = len([record for record in all_records if record[2] == 'active'])
+        total_unknown = len([record for record in all_records if record[2] == 'unknown'])
+
         logger.info(f"Total listing aktif: {total_active}")
+        logger.info(f"Total listing unknown: {total_unknown}")
 
         start_index = 0
         batch_number = 0
 
-        while start_index < total_active:
+        while start_index < len(all_records):
             end_index = start_index + self.batch_size
             batch_records = all_records[start_index:end_index]
             batch_number += 1
@@ -148,7 +217,7 @@ class ListingTrackerMudahmy:
 
             try:
                 for row in batch_records:
-                    car_id, url = row
+                    car_id, url, current_status = row  
                     logger.info(f"> ID={car_id} => Memeriksa {url}")
 
                     if not self.get_page_with_retry(driver, url):
@@ -160,7 +229,7 @@ class ListingTrackerMudahmy:
                         conn.commit()
                         continue
 
-                    self.random_delay(3, 7)  
+                    self.random_delay(3, 7)
 
                     if self._is_redirected(driver):
                         logger.info(f"> ID={car_id} => redirect -> 'sold'")
@@ -170,19 +239,14 @@ class ListingTrackerMudahmy:
                             WHERE id = %s
                         """, (car_id,))
                     else:
-                        if self._check_h1_active(driver):
-                            logger.info(f"> ID={car_id} => masih active (H1 ditemukan)")
+                        if not self._check_h1_active_with_retry(driver, car_id, url):  # <-- Panggil fungsi retry
+                            continue  
                         else:
-                            logger.info(f"> ID={car_id} => tidak ada H1 -> 'sold'")
-                            driver.save_screenshot(f"screenshot_{car_id}.png")
-                            with open(f"page_source_{car_id}.html", "w", encoding="utf-8") as f:
-                                f.write(driver.page_source)
+                            logger.info(f"> ID={car_id} => H1 ditemukan, status aktif.")
 
-                            cursor.execute("""
-                                UPDATE cars
-                                SET status = 'sold', sold_at = NOW()
-                                WHERE id = %s
-                            """, (car_id,))
+                        # Jika berhasil, update status jika sebelumnya 'unknown'
+                        if current_status == "unknown":
+                            self._update_car_info(car_id, "active", None)
 
                     conn.commit()
 
@@ -194,3 +258,28 @@ class ListingTrackerMudahmy:
         cursor.close()
         conn.close()
         logger.info("\nProses tracking selesai.")
+
+    def _update_car_info(self, car_id, status, sold_at):
+        """
+        Memperbarui status mobil di database (tabel 'cars').
+        """
+        conn = None
+        try:
+            conn = get_database_connection()
+            cursor = conn.cursor()
+            query = f"""
+                UPDATE {DB_TABLE_PRIMARY}
+                SET status = %s, sold_at = %s, last_scraped_at = %s
+                WHERE id = %s
+            """
+            cursor.execute(query, (status, sold_at, datetime.now(), car_id))
+            conn.commit()
+            cursor.close()
+            logger.info(f"ID={car_id} => Status diperbarui menjadi {status}.")
+        except Exception as e:
+            logger.error(f"Error updating car info for car_id={car_id}: {e}")
+            if conn:
+                conn.rollback()
+        finally:
+            if conn:
+                conn.close()
