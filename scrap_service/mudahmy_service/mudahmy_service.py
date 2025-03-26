@@ -3,6 +3,8 @@ import time
 import logging
 import re
 import pandas as pd
+import random
+import psutil
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -25,6 +27,8 @@ DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history")
 
 INPUT_FILE = os.getenv("INPUT_FILE", "mudahmy_brands.csv")
 
+def count_chrome_processes():
+    return len([p for p in psutil.process_iter(['name']) if p.info['name'] and 'chrome' in p.info['name'].lower()])
 class MudahMyService:
     def __init__(self):
         self.driver = None
@@ -32,7 +36,7 @@ class MudahMyService:
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
 
-        self.batch_size = 40
+        self.batch_size = 25
         self.listing_count = 0
 
     def init_driver(self):
@@ -53,10 +57,10 @@ class MudahMyService:
 
     def quit_driver(self):
         if self.driver:
-            logging.info("Menutup ChromeDriver...")
+            logging.info(f"Menutup ChromeDriver... (Chrome aktif: {count_chrome_processes()} sebelum quit)")
             try:
                 self.driver.quit()
-                logging.info("ChromeDriver berhasil ditutup.")
+                logging.info(f"ChromeDriver berhasil ditutup. (Chrome aktif: {count_chrome_processes()} setelah quit)")
             except Exception as e:
                 logging.error(f"Gagal menutup ChromeDriver: {e}")
             self.driver = None
@@ -71,6 +75,7 @@ class MudahMyService:
         while attempt < max_retries:
             try:
                 self.driver.get(listing_page_url)
+                time.sleep(random.uniform(1.5, 3.0))
                 time.sleep(3)
                 WebDriverWait(self.driver, 60).until(
                     EC.presence_of_all_elements_located((By.XPATH, "//div[@data-testid[contains(., 'listing-ad-item')]]//a"))
@@ -112,6 +117,7 @@ class MudahMyService:
             logging.info(f"🔍 Mengambil detail dari: {detail_url}")
             try:
                 self.driver.get(detail_url)
+                time.sleep(random.uniform(1.5, 3.0))
                 time.sleep(3)
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
 
