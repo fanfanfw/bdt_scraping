@@ -1,0 +1,58 @@
+2025-03-27 16:51:41,165 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-27 16:51:41,165 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-27 16:51:41,166 - INFO -  * Restarting with stat
+2025-03-27 16:51:41,414 - WARNING -  * Debugger is active!
+2025-03-27 16:51:41,414 - INFO -  * Debugger PIN: 700-564-196
+2025-03-27 16:51:44,880 - INFO - 
+==================================================
+2025-03-27 16:51:44,880 - INFO - Memulai Halaman 1 untuk https://www.mudah.my/malaysia/cars-for-sale/honda/br-v
+2025-03-27 16:51:47,538 - INFO - IP Saat Ini: 115.164.49.14
+2025-03-27 16:51:47,539 - INFO - Menuju https://www.mudah.my/malaysia/cars-for-sale/honda/br-v?o=1 (delay 16.0s)
+2025-03-27 16:51:57,884 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-27 16:51:57,884 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-27 16:51:57,885 - INFO -  * Restarting with stat
+2025-03-27 16:51:58,146 - WARNING -  * Debugger is active!
+2025-03-27 16:51:58,146 - INFO -  * Debugger PIN: 700-564-196
+2025-03-27 16:52:00,979 - INFO - 
+==================================================
+2025-03-27 16:52:00,979 - INFO - Memulai Halaman 1 untuk https://www.mudah.my/malaysia/cars-for-sale/honda/br-v
+2025-03-27 16:52:03,706 - INFO - IP Saat Ini: 27.125.249.242
+2025-03-27 16:52:03,707 - INFO - Menuju https://www.mudah.my/malaysia/cars-for-sale/honda/br-v?o=1 (delay 15.9s)
+2025-03-27 16:52:46,279 - ERROR - Error saat scraping: Timeout 15000ms exceeded.
+2025-03-27 16:52:46,526 - INFO - 127.0.0.1 - - [27/Mar/2025 16:52:46] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-03-27 16:53:37,633 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-27 16:53:37,633 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-27 16:53:37,634 - INFO -  * Restarting with stat
+2025-03-27 16:53:37,918 - WARNING -  * Debugger is active!
+2025-03-27 16:53:37,919 - INFO -  * Debugger PIN: 700-564-196
+2025-03-27 16:53:42,866 - INFO - 
+==================================================
+2025-03-27 16:53:42,866 - INFO - Memulai Halaman 1 untuk https://www.mudah.my/malaysia/cars-for-sale/honda/br-v
+2025-03-27 16:53:46,019 - INFO - IP Saat Ini: 180.75.238.253
+2025-03-27 16:53:46,020 - INFO - Menuju https://www.mudah.my/malaysia/cars-for-sale/honda/br-v?o=1 (delay 3.6s)
+2025-03-27 16:54:14,401 - ERROR - Error saat scraping: Timeout 15000ms exceeded.
+2025-03-27 16:54:14,641 - INFO - 127.0.0.1 - - [27/Mar/2025 16:54:14] "POST /scrape/mudahmy HTTP/1.1" 200 -
+2025-03-27 16:55:04,800 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service_playwright/mudahmy_service.py', reloading
+2025-03-27 16:55:04,897 - INFO -  * Restarting with stat
+2025-03-27 16:55:05,207 - WARNING -  * Debugger is active!
+2025-03-27 16:55:05,207 - INFO -  * Debugger PIN: 700-564-196
+2025-03-27 16:55:18,347 - INFO -  * Detected change in '/home/fanfan/fanfan/scraping/scrap_service/mudahmy_service_playwright/mudahmy_service.py', reloading
+2025-03-27 16:55:18,438 - INFO -  * Restarting with stat
+2025-03-27 16:55:18,772 - WARNING -  * Debugger is active!
+2025-03-27 16:55:18,773 - INFO -  * Debugger PIN: 700-564-196
+2025-03-27 16:55:30,618 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-03-27 16:55:30,618 - INFO - [33mPress CTRL+C to quit[0m
+2025-03-27 16:55:30,619 - INFO -  * Restarting with stat
+2025-03-27 16:55:30,898 - WARNING -  * Debugger is active!
+2025-03-27 16:55:30,899 - INFO -  * Debugger PIN: 700-564-196
+2025-03-27 16:55:34,423 - INFO - 
+==================================================
+2025-03-27 16:55:34,423 - INFO - Memulai Halaman 1 untuk https://www.mudah.my/malaysia/cars-for-sale/honda/br-v
+2025-03-27 16:55:37,006 - INFO - IP Saat Ini: 161.142.158.116
+2025-03-27 16:55:37,007 - INFO - Menuju https://www.mudah.my/malaysia/cars-for-sale/honda/br-v?o=1 (delay 3.9s)
+2025-03-27 16:56:21,190 - ERROR - Error saat scraping: Timeout 30000ms exceeded.
+2025-03-27 16:56:21,569 - INFO - 127.0.0.1 - - [27/Mar/2025 16:56:21] "POST /scrape/mudahmy HTTP/1.1" 200 -
