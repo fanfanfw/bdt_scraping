@@ -8,7 +8,7 @@ scrap_service/imagedownload_service/.env
 scrap_service/listing_tracker_service_carlistmy/.env
 scrap_service/listing_tracker_service_mudahmy/.env
 __pycache__
-
+.idea/
 scrap_service/imagedownload_service/storage
 
 *.html
