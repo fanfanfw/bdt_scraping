@@ -278,12 +278,30 @@ class MudahMyService:
         return total_scraped, need_restart
 
     def scrape_all_brands(self, brand=None, model=None, start_page=1):
+        """
+        Baca CSV:
+          - Jika brand dan model diberikan, mulai scraping dari baris yang cocok,
+            lalu lanjutkan ke seluruh baris berikutnya di CSV.
+          - Jika tidak diberikan, scraping dimulai dari baris pertama.
+        """
         self.reset_scraping()
 
         # Baca CSV
         df = pd.read_csv(INPUT_FILE)
 
+        # Jika brand dan model diberikan, cari indeks baris pertama yang cocok
+        if brand and model:
+            df = df.reset_index()  # pastikan index dari 0
+            matching_rows = df[(df['brand'].str.lower() == brand.lower()) & (df['model'].str.lower() == model.lower())]
+            if matching_rows.empty:
+                logging.warning("Brand dan model tidak ditemukan dalam CSV.")
                 return
+            start_index = matching_rows.index[0]
+            logging.info(f"Mulai scraping dari baris {start_index} sesuai dengan request {brand}, {model}.")
+            # Ambil baris mulai dari start_index hingga akhir
+            df = df.iloc[start_index:]
+        else:
+            logging.info("Mulai scraping dari baris pertama (tidak ada filter brand/model).")
 
         # Loop setiap baris (brand+model) yang lolos filter
         for _, row in df.iterrows():
@@ -292,7 +310,9 @@ class MudahMyService:
             base_url = row['url']
 
             logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page={start_page}")
+            total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, start_page)
             logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
+            # Jika request spesifik (brand dan model) diberikan, kita tetap lanjut ke baris berikutnya sesuai CSV
 
         logging.info("Proses scraping selesai untuk filter brand/model.")
 
@@ -306,16 +326,28 @@ class MudahMyService:
         logging.info("Scraping direset.")
 
     def save_to_db(self, car_data):
+        """
+        Simpan atau update data mobil ke database.
+        Untuk kolom gambar, kirimkan list Python agar psycopg2 mengonversinya ke TEXT[].
+        Versi akan di-set ke 1 untuk insert baru, dan naik 1 setiap update.
+        """
         try:
             # Cek apakah listing_url sudah ada
+            self.cursor.execute(
+                "SELECT id, price, version FROM {} WHERE listing_url = %s".format(DB_TABLE_SCRAP),
+                (car_data["listing_url"],)
+            )
             row = self.cursor.fetchone()
 
             # Konversi harga dan tahun jika diperlukan (misal 'RM 36,400' → 36400)
             price_int = int(re.sub(r"[^\d]", "", car_data.get("price", ""))) if car_data.get("price") else 0
+            year_int = int(re.search(r"(\d{4})", car_data.get("year", "")).group(1)) if car_data.get(
+                "year") and re.search(r"(\d{4})", car_data.get("year", "")) else 0
 
             if row:
                 car_id = row[0]
                 old_price = row[1] if row[1] else 0
+                current_version = row[2] if row[2] is not None else 0
                 new_price = price_int
                 update_query = f"""
                     UPDATE {DB_TABLE_SCRAP}
@@ -330,8 +362,12 @@ class MudahMyService:
                         transmission = %s,
                         seat_capacity = %s,
                         gambar = %s,
+                        last_scraped_at = %s,
+                        version = %s
                     WHERE id = %s
                 """
+                # Naikkan versi dari data yang ada
+                new_version = current_version + 1
                 self.cursor.execute(update_query, (
                     car_data.get("brand"),
                     car_data.get("model"),
@@ -345,8 +381,10 @@ class MudahMyService:
                     car_data.get("seat_capacity"),
                     car_data.get("gambar"),  # kirim list Python
                     datetime.now(),
+                    new_version,
                     car_id
                 ))
+                # Misalnya histori harga hanya dicatat jika terjadi perubahan harga
                 if new_price != old_price and old_price != 0:
                     insert_history = f"""
                         INSERT INTO {DB_TABLE_HISTORY_PRICE} (car_id, old_price, new_price)
@@ -357,9 +395,12 @@ class MudahMyService:
                 insert_query = f"""
                     INSERT INTO {DB_TABLE_SCRAP}
                         (listing_url, brand, model, variant, informasi_iklan, lokasi, price,
+                         year, millage, transmission, seat_capacity, gambar, version)
                     VALUES
                         (%s, %s, %s, %s, %s, %s, %s,
+                         %s, %s, %s, %s, %s, %s)
                 """
+                # Untuk data baru, versi di-set ke 1
                 self.cursor.execute(insert_query, (
                     car_data["listing_url"],
                     car_data.get("brand"),
@@ -372,6 +413,8 @@ class MudahMyService:
                     car_data.get("millage"),
                     car_data.get("transmission"),
                     car_data.get("seat_capacity"),
+                    car_data.get("gambar"),
+                    1
                 ))
             self.conn.commit()
             logging.info(f"✅ Data untuk listing_url={car_data['listing_url']} berhasil disimpan/diupdate.")

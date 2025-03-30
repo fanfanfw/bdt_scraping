@@ -1,6 +1,8 @@
 # mudahmy_service_playwright/app.py
 
 from flask import Flask, jsonify, request
+from scrap_service.mudahmy_service_playwright.mudahmy_service import MudahMyService
+from scrap_service.mudahmy_service_playwright.database import get_connection
 import os
 import psycopg2
 
