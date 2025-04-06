@@ -10,7 +10,7 @@ scrap_service/listing_tracker_service_mudahmy/.env
 __pycache__
 .idea/
 scrap_service/imagedownload_service/storage
-
+logs
 *.html
 *.png
 

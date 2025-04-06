@@ -10,18 +10,37 @@ from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 from playwright_stealth import stealth_sync
 from .database import get_connection
+from pathlib import Path
 
 load_dotenv()
 
-# Ambil konfigurasi dari environment
 DB_TABLE_SCRAP = os.getenv("DB_TABLE_SCRAP", "url")
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history")
 INPUT_FILE = os.getenv("INPUT_FILE", "mudahmy_service_playwright/storage/inputfiles/mudahMY_scraplist.csv")
 
+def should_use_proxy():
+    return (
+        os.getenv("USE_PROXY", "false").lower() == "true" and
+        os.getenv("PROXY_SERVER") and
+        os.getenv("PROXY_USERNAME") and
+        os.getenv("PROXY_PASSWORD")
+    )
+
+base_dir = Path(__file__).resolve().parents[2]
+log_dir = base_dir / "logs"
+log_dir.mkdir(parents=True, exist_ok=True)
+
+start_date_str = datetime.now().strftime('%Y-%m-%d')
+log_file = log_dir / f"mudahmy_{start_date_str}.log"
+
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler()
+    ]
 )
 
 class MudahMyService:
@@ -29,25 +48,32 @@ class MudahMyService:
         self.stop_flag = False
         self.batch_size = 40
         self.listing_count = 0
-        # Inisialisasi koneksi database
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
 
     def init_browser(self):
         self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.launch(
-            headless=True,
-            proxy={
-                "server": os.getenv("PROXY_SERVER"),
-                "username": os.getenv("PROXY_USERNAME"),
-                "password": os.getenv("PROXY_PASSWORD")
-            },
-            args=[
+
+        launch_kwargs = {
+            "headless": True,
+            "args": [
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
                 "--disable-web-security"
             ]
-        )
+        }
+
+        if should_use_proxy():
+            launch_kwargs["proxy"] = {
+                "server": os.getenv("PROXY_SERVER"),
+                "username": os.getenv("PROXY_USERNAME"),
+                "password": os.getenv("PROXY_PASSWORD")
+            }
+            logging.info("🌐 Proxy aktif (Oxylabs digunakan)")
+        else:
+            logging.info("⚡ Menjalankan browser tanpa proxy")
+
+        self.browser = self.playwright.chromium.launch(**launch_kwargs)
         self.context = self.browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             viewport={"width": 1366, "height": 768},
@@ -56,7 +82,7 @@ class MudahMyService:
         )
         self.page = self.context.new_page()
         stealth_sync(self.page)
-        logging.info("Browser Playwright berhasil diinisialisasi.")
+        logging.info("✅ Browser Playwright berhasil diinisialisasi.")
 
     def quit_browser(self):
         try:
@@ -64,7 +90,7 @@ class MudahMyService:
         except Exception as e:
             logging.error(e)
         self.playwright.stop()
-        logging.info("Browser Playwright ditutup.")
+        logging.info("🛑 Browser Playwright ditutup.")
 
     def get_current_ip(self, page):
         try:
@@ -125,7 +151,6 @@ class MudahMyService:
                     if 'mudah.my' in href:
                         urls.append(href)
             
-            # Cek jumlah listing URL dan tampilkan di log
             total_listing = len(list(set(urls)))
             logging.info(f"📄 Ditemukan {total_listing} listing URLs di halaman {url}.")
             
@@ -286,24 +311,20 @@ class MudahMyService:
         """
         self.reset_scraping()
 
-        # Baca CSV
         df = pd.read_csv(INPUT_FILE)
 
-        # Jika brand dan model diberikan, cari indeks baris pertama yang cocok
         if brand and model:
-            df = df.reset_index()  # pastikan index dari 0
+            df = df.reset_index()
             matching_rows = df[(df['brand'].str.lower() == brand.lower()) & (df['model'].str.lower() == model.lower())]
             if matching_rows.empty:
                 logging.warning("Brand dan model tidak ditemukan dalam CSV.")
                 return
             start_index = matching_rows.index[0]
             logging.info(f"Mulai scraping dari baris {start_index} sesuai dengan request {brand}, {model}.")
-            # Ambil baris mulai dari start_index hingga akhir
             df = df.iloc[start_index:]
         else:
             logging.info("Mulai scraping dari baris pertama (tidak ada filter brand/model).")
 
-        # Loop setiap baris (brand+model) yang lolos filter
         for _, row in df.iterrows():
             brand_name = row['brand']
             model_name = row['model']
@@ -312,7 +333,6 @@ class MudahMyService:
             logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page={start_page}")
             total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, start_page)
             logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
-            # Jika request spesifik (brand dan model) diberikan, kita tetap lanjut ke baris berikutnya sesuai CSV
 
         logging.info("Proses scraping selesai untuk filter brand/model.")
 
@@ -332,14 +352,12 @@ class MudahMyService:
         Versi akan di-set ke 1 untuk insert baru, dan naik 1 setiap update.
         """
         try:
-            # Cek apakah listing_url sudah ada
             self.cursor.execute(
                 "SELECT id, price, version FROM {} WHERE listing_url = %s".format(DB_TABLE_SCRAP),
                 (car_data["listing_url"],)
             )
             row = self.cursor.fetchone()
 
-            # Konversi harga dan tahun jika diperlukan (misal 'RM 36,400' → 36400)
             price_int = int(re.sub(r"[^\d]", "", car_data.get("price", ""))) if car_data.get("price") else 0
             year_int = int(re.search(r"(\d{4})", car_data.get("year", "")).group(1)) if car_data.get(
                 "year") and re.search(r"(\d{4})", car_data.get("year", "")) else 0
@@ -366,7 +384,6 @@ class MudahMyService:
                         version = %s
                     WHERE id = %s
                 """
-                # Naikkan versi dari data yang ada
                 new_version = current_version + 1
                 self.cursor.execute(update_query, (
                     car_data.get("brand"),
@@ -379,12 +396,11 @@ class MudahMyService:
                     car_data.get("millage"),
                     car_data.get("transmission"),
                     car_data.get("seat_capacity"),
-                    car_data.get("gambar"),  # kirim list Python
+                    car_data.get("gambar"),
                     datetime.now(),
                     new_version,
                     car_id
                 ))
-                # Misalnya histori harga hanya dicatat jika terjadi perubahan harga
                 if new_price != old_price and old_price != 0:
                     insert_history = f"""
                         INSERT INTO {DB_TABLE_HISTORY_PRICE} (car_id, old_price, new_price)
@@ -400,7 +416,6 @@ class MudahMyService:
                         (%s, %s, %s, %s, %s, %s, %s,
                          %s, %s, %s, %s, %s, %s)
                 """
-                # Untuk data baru, versi di-set ke 1
                 self.cursor.execute(insert_query, (
                     car_data["listing_url"],
                     car_data.get("brand"),
