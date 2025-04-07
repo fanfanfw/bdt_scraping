@@ -32,7 +32,7 @@ log_dir = base_dir / "logs"
 log_dir.mkdir(parents=True, exist_ok=True)
 
 start_date_str = datetime.now().strftime('%Y-%m-%d')
-log_file = log_dir / f"mudahmy_{start_date_str}.log"
+log_file = log_dir / f"scrape_mudahmy_{start_date_str}.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -43,6 +43,23 @@ logging.basicConfig(
     ]
 )
 
+
+def get_custom_proxy_list():
+    raw = os.getenv("CUSTOM_PROXIES", "")
+    proxies = [p.strip() for p in raw.split(",") if p.strip()]
+    parsed = []
+    for p in proxies:
+        try:
+            ip, port, user, pw = p.split(":")
+            parsed.append({
+                "server": f"{ip}:{port}",
+                "username": user,
+                "password": pw
+            })
+        except ValueError:
+            continue
+    return parsed
+
 class MudahMyService:
     def __init__(self):
         self.stop_flag = False
@@ -50,6 +67,8 @@ class MudahMyService:
         self.listing_count = 0
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
+        self.custom_proxies = get_custom_proxy_list()
+        self.proxy_index = 0
 
     def init_browser(self):
         self.playwright = sync_playwright().start()
@@ -63,13 +82,19 @@ class MudahMyService:
             ]
         }
 
-        if should_use_proxy():
+        proxy_mode = os.getenv("PROXY_MODE", "none").lower()
+        if proxy_mode == "oxylabs":
             launch_kwargs["proxy"] = {
                 "server": os.getenv("PROXY_SERVER"),
                 "username": os.getenv("PROXY_USERNAME"),
                 "password": os.getenv("PROXY_PASSWORD")
             }
             logging.info("🌐 Proxy aktif (Oxylabs digunakan)")
+        elif proxy_mode == "custom" and self.custom_proxies:
+            proxy = self.custom_proxies[self.proxy_index % len(self.custom_proxies)]
+            launch_kwargs["proxy"] = proxy
+            logging.info(f"🌐 Proxy custom digunakan: {proxy['server']} (index {self.proxy_index})")
+            self.proxy_index += 1
         else:
             logging.info("⚡ Menjalankan browser tanpa proxy")
 
@@ -92,14 +117,20 @@ class MudahMyService:
         self.playwright.stop()
         logging.info("🛑 Browser Playwright ditutup.")
 
-    def get_current_ip(self, page):
-        try:
-            page.goto('https://ip.oxylabs.io/', timeout=10000)
-            ip_text = page.inner_text('body')
-            ip = ip_text.strip()
-            logging.info(f"IP Saat Ini: {ip}")
-        except Exception as e:
-            logging.error(f"Gagal mendapatkan IP: {e}")
+    def get_current_ip(self, page, retries=3):
+        for attempt in range(1, retries + 1):
+            try:
+                page.goto('https://ip.oxylabs.io/', timeout=10000)
+                ip_text = page.inner_text('body')
+                ip = ip_text.strip()
+                logging.info(f"IP Saat Ini: {ip}")
+                return
+            except Exception as e:
+                logging.warning(f"Attempt {attempt} gagal mendapatkan IP: {e}")
+                if attempt == retries:
+                    logging.error("Gagal mendapatkan IP setelah beberapa percobaan")
+                else:
+                    time.sleep(3)
 
     def scrape_page(self, page, url):
         try:
@@ -258,7 +289,6 @@ class MudahMyService:
     def scrape_listings_for_brand(self, base_url, brand_name, model_name, start_page=1):
         total_scraped = 0
         current_page = start_page
-        need_restart = False
         self.init_browser()
         try:
             while True:
@@ -269,6 +299,7 @@ class MudahMyService:
                 current_url = f"{base_url}?o={current_page}"
                 logging.info(f"Scraping halaman {current_page}: {current_url}")
                 listing_urls = self.scrape_page(self.page, current_url)
+
                 if not listing_urls:
                     logging.info("Tidak ada listing URL ditemukan, pindah ke brand/model berikutnya.")
                     break
@@ -276,9 +307,21 @@ class MudahMyService:
                 for url in listing_urls:
                     if self.stop_flag:
                         break
+
                     detail_data = self.scrape_listing_detail(self.page, url)
+
                     if detail_data:
-                        self.save_to_db(detail_data)
+                        max_db_retries = 3
+                        for attempt in range(1, max_db_retries + 1):
+                            try:
+                                self.save_to_db(detail_data)
+                                break
+                            except Exception as e:
+                                logging.warning(f"⚠️ Attempt {attempt} gagal simpan data untuk {url}: {e}")
+                                if attempt == max_db_retries:
+                                    logging.error(f"❌ Gagal simpan data setelah {max_db_retries} percobaan: {url}")
+                                else:
+                                    time.sleep(2)
                         total_scraped += 1
                     else:
                         logging.warning(f"Gagal mengambil detail untuk URL: {url}")
@@ -297,10 +340,11 @@ class MudahMyService:
                 delay = random.uniform(5, 10)
                 logging.info(f"Menunggu {delay:.1f} detik sebelum halaman berikutnya...")
                 time.sleep(delay)
+
             logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
         finally:
             self.quit_browser()
-        return total_scraped, need_restart
+        return total_scraped, False
 
     def scrape_all_brands(self, brand=None, model=None, start_page=1):
         """
