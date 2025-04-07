@@ -29,6 +29,21 @@ logger = logging.getLogger("tracker")
 
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 
+def get_custom_proxy_list():
+    raw = os.getenv("CUSTOM_PROXIES", "")
+    proxies = [p.strip() for p in raw.split(",") if p.strip()]
+    parsed = []
+    for p in proxies:
+        try:
+            ip, port, user, pw = p.split(":")
+            parsed.append({
+                "server": f"{ip}:{port}",
+                "username": user,
+                "password": pw
+            })
+        except ValueError:
+            continue
+    return parsed
 
 def should_use_proxy():
     return (
@@ -45,6 +60,8 @@ class ListingTrackerMudahmyPlaywright:
         self.redirect_url = "https://www.mudah.my/malaysia/cars-for-sale"
         self.active_selector = "#ad_view_ad_highlights h1"
         self.sold_text_indicator = "This car has already been sold."
+        self.custom_proxies = get_custom_proxy_list()
+        self.proxy_index = 0
 
     def init_browser(self):
         self.playwright = sync_playwright().start()
@@ -54,13 +71,18 @@ class ListingTrackerMudahmyPlaywright:
             "args": ["--disable-blink-features=AutomationControlled", "--no-sandbox"]
         }
 
-        if should_use_proxy():
+        proxy_mode = os.getenv("PROXY_MODE", "none").lower()
+        if proxy_mode == "oxylabs":
             launch_kwargs["proxy"] = {
                 "server": os.getenv("PROXY_SERVER"),
                 "username": os.getenv("PROXY_USERNAME"),
                 "password": os.getenv("PROXY_PASSWORD")
             }
             logger.info("🌐 Proxy aktif (Oxylabs digunakan)")
+        elif proxy_mode == "custom" and self.custom_proxies:
+            proxy = random.choice(self.custom_proxies)
+            launch_kwargs["proxy"] = proxy
+            logger.info(f"🌐 Proxy custom digunakan (random): {proxy['server']}")
         else:
             logger.info("⚡ Menjalankan browser tanpa proxy")
 
@@ -72,7 +94,8 @@ class ListingTrackerMudahmyPlaywright:
             locale="en-US",
             timezone_id="Asia/Kuala_Lumpur"
         )
-        self.context.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
+        self.context.route("**/*", lambda route,
+                                          request: route.abort() if request.resource_type == "image" else route.continue_())
         self.page = self.context.new_page()
         stealth_sync(self.page)
         logger.info("✅ Browser Playwright diinisialisasi.")

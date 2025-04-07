@@ -91,10 +91,9 @@ class MudahMyService:
             }
             logging.info("🌐 Proxy aktif (Oxylabs digunakan)")
         elif proxy_mode == "custom" and self.custom_proxies:
-            proxy = self.custom_proxies[self.proxy_index % len(self.custom_proxies)]
+            proxy = random.choice(self.custom_proxies)
             launch_kwargs["proxy"] = proxy
-            logging.info(f"🌐 Proxy custom digunakan: {proxy['server']} (index {self.proxy_index})")
-            self.proxy_index += 1
+            logging.info(f"🌐 Proxy custom digunakan (random): {proxy['server']}")
         else:
             logging.info("⚡ Menjalankan browser tanpa proxy")
 
@@ -358,25 +357,49 @@ class MudahMyService:
         df = pd.read_csv(INPUT_FILE)
 
         if brand and model:
-            df = df.reset_index()
-            matching_rows = df[(df['brand'].str.lower() == brand.lower()) & (df['model'].str.lower() == model.lower())]
+            df = df.reset_index(drop=True)
+            matching_rows = df[
+                (df['brand'].str.lower() == brand.lower()) &
+                (df['model'].str.lower() == model.lower())
+                ]
             if matching_rows.empty:
                 logging.warning("Brand dan model tidak ditemukan dalam CSV.")
                 return
+
+            # Ambil baris index pertama yang cocok
             start_index = matching_rows.index[0]
-            logging.info(f"Mulai scraping dari baris {start_index} sesuai dengan request {brand}, {model}.")
-            df = df.iloc[start_index:]
+            logging.info(
+                f"Mulai scraping dari baris {start_index} untuk brand={brand}, model={model} (start_page={start_page}).")
+
+            # Mulai dari baris yang cocok, lalu lanjutkan baris berikutnya
+            for i in range(start_index, len(df)):
+                row = df.iloc[i]
+                brand_name = row['brand']
+                model_name = row['model']
+                base_url = row['url']
+
+                # Hanya untuk baris pertama (brand & model yang dicari), gunakan start_page
+                # Sisanya reset ke 1
+                if i == start_index:
+                    current_page = start_page
+                else:
+                    current_page = 1
+
+                logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page={current_page}")
+                total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, current_page)
+                logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
         else:
+            # Tidak ada filter brand, model => scrape dari awal CSV, page=1
             logging.info("Mulai scraping dari baris pertama (tidak ada filter brand/model).")
+            df = df.reset_index(drop=True)
+            for i, row in df.iterrows():
+                brand_name = row['brand']
+                model_name = row['model']
+                base_url = row['url']
 
-        for _, row in df.iterrows():
-            brand_name = row['brand']
-            model_name = row['model']
-            base_url = row['url']
-
-            logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page={start_page}")
-            total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, start_page)
-            logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
+                logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page=1")
+                total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, 1)
+                logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
 
         logging.info("Proses scraping selesai untuk filter brand/model.")
 
