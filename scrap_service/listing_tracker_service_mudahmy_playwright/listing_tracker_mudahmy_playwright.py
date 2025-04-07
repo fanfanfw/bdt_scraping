@@ -15,7 +15,7 @@ load_dotenv()
 start_date_str = datetime.now().strftime('%Y-%m-%d')
 log_dir = Path(__file__).resolve().parents[2] / "logs"  # scraping/logs
 log_dir.mkdir(parents=True, exist_ok=True)
-log_file = log_dir / f"tracker_{start_date_str}.log"
+log_file = log_dir / f"tracker_mudahmy_{start_date_str}.log"
 
 logging.basicConfig(
     level=logging.INFO,
