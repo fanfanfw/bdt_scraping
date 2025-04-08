@@ -12,11 +12,13 @@ from scrap_service.listing_tracker_service_carlistmy_playwright.database import 
 
 load_dotenv()
 
-start_date_str = datetime.now().strftime('%Y-%m-%d')
+START_DATE = datetime.now().strftime('%Y%m%d')
 
-log_dir = Path(__file__).resolve().parents[2] / "logs"
+base_dir = Path(__file__).resolve().parents[2]
+log_dir = base_dir / "scraping" / "logs"
 log_dir.mkdir(parents=True, exist_ok=True)
-log_file = log_dir / f"tracker_carlistmy_{start_date_str}.log"
+
+log_file = log_dir / f"tracker_carlistmy_{START_DATE}.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,17 +30,45 @@ logging.basicConfig(
 )
 logger = logging.getLogger("carlistmy_tracker")
 
+
+def take_screenshot(page, name: str):
+    try:
+        error_folder_name = datetime.now().strftime('%Y%m%d') + "_error_carlistmy_tracker"
+        screenshot_dir = log_dir / error_folder_name
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.now().strftime('%H%M%S')
+        screenshot_path = screenshot_dir / f"{name}_{timestamp}.png"
+        page.screenshot(path=str(screenshot_path))
+        logger.info(f"📸 Screenshot disimpan: {screenshot_path}")
+    except Exception as e:
+        logger.warning(f"❌ Gagal menyimpan screenshot: {e}")
+
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 
+def get_custom_proxy_list():
+    raw = os.getenv("CUSTOM_PROXIES", "")
+    proxies = [p.strip() for p in raw.split(",") if p.strip()]
+    parsed = []
+    for p in proxies:
+        try:
+            ip, port, user, pw = p.split(":")
+            parsed.append({
+                "server": f"{ip}:{port}",
+                "username": user,
+                "password": pw
+            })
+        except ValueError:
+            continue
+    return parsed
 
 def should_use_proxy():
     return (
-        os.getenv("USE_PROXY", "false").lower() == "true" and
-        os.getenv("PROXY_SERVER") and
-        os.getenv("PROXY_USERNAME") and
-        os.getenv("PROXY_PASSWORD")
+        os.getenv("USE_PROXY", "false").lower() == "true"
+        and os.getenv("PROXY_SERVER")
+        and os.getenv("PROXY_USERNAME")
+        and os.getenv("PROXY_PASSWORD")
     )
-
 
 class ListingTrackerCarlistmyPlaywright:
     def __init__(self, batch_size=25):
@@ -46,14 +76,8 @@ class ListingTrackerCarlistmyPlaywright:
         self.sold_selector = "h2"
         self.sold_text_indicator = "This car has already been sold."
         self.active_selector = "h1"
-
-    def get_current_ip(self):
-        try:
-            self.page.goto('https://ip.oxylabs.io/', timeout=15000)
-            ip_text = self.page.inner_text('body').strip()
-            logger.info(f"🌐 IP yang digunakan: {ip_text}")
-        except Exception as e:
-            logger.error(f"Gagal mendapatkan IP saat ini: {e}")
+        # Tambahkan proxies custom
+        self.custom_proxies = get_custom_proxy_list()
 
     def init_browser(self):
         self.playwright = sync_playwright().start()
@@ -63,13 +87,18 @@ class ListingTrackerCarlistmyPlaywright:
             "args": ["--disable-blink-features=AutomationControlled", "--no-sandbox"]
         }
 
-        if should_use_proxy():
+        proxy_mode = os.getenv("PROXY_MODE", "none").lower()
+        if proxy_mode == "oxylabs":
             launch_kwargs["proxy"] = {
                 "server": os.getenv("PROXY_SERVER"),
                 "username": os.getenv("PROXY_USERNAME"),
                 "password": os.getenv("PROXY_PASSWORD")
             }
             logger.info("🌐 Proxy aktif (Oxylabs digunakan)")
+        elif proxy_mode == "custom" and self.custom_proxies:
+            proxy = random.choice(self.custom_proxies)
+            launch_kwargs["proxy"] = proxy
+            logger.info(f"🌐 Proxy custom digunakan (random): {proxy['server']}")
         else:
             logger.info("⚡ Menjalankan browser tanpa proxy")
 
@@ -80,10 +109,25 @@ class ListingTrackerCarlistmyPlaywright:
             locale="en-US",
             timezone_id="Asia/Kuala_Lumpur"
         )
-        self.context.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
+
+        self.context.route(
+            "**/*",
+            lambda route, request: route.abort() if request.resource_type == "image" else route.continue_()
+        )
+
         self.page = self.context.new_page()
         stealth_sync(self.page)
         logger.info("✅ Browser Playwright diinisialisasi.")
+
+    def get_current_ip(self):
+        try:
+            self.page.goto('https://ip.oxylabs.io/', timeout=15000)
+            ip_text = self.page.inner_text('body').strip()
+            logger.info(f"🌐 IP yang digunakan: {ip_text}")
+        except Exception as e:
+            logger.error(f"Gagal mendapatkan IP saat ini: {e}")
+            # Screenshot saat gagal
+            take_screenshot(self.page, "failed_get_ip")
 
     def quit_browser(self):
         try:
@@ -94,25 +138,37 @@ class ListingTrackerCarlistmyPlaywright:
             self.playwright.stop()
         except Exception:
             pass
+        logger.info("🛑 Browser Playwright ditutup.")
 
     def random_delay(self, min_d=2, max_d=5):
         time.sleep(random.uniform(min_d, max_d))
 
     def update_car_status(self, car_id, status, sold_at=None):
         conn = get_database_connection()
+        if not conn:
+            logger.error("Tidak bisa update status, koneksi database gagal.")
+            return
         cursor = conn.cursor()
-        cursor.execute(f"""
-            UPDATE {DB_TABLE_PRIMARY}
-            SET status = %s, sold_at = %s, last_scraped_at = %s
-            WHERE id = %s
-        """, (status, sold_at, datetime.now(), car_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        logger.info(f"> ID={car_id} => Status diupdate ke '{status}'")
+        try:
+            cursor.execute(f"""
+                UPDATE {DB_TABLE_PRIMARY}
+                SET status = %s, sold_at = %s, last_scraped_at = %s
+                WHERE id = %s
+            """, (status, sold_at, datetime.now(), car_id))
+            conn.commit()
+            logger.info(f"> ID={car_id} => Status diupdate ke '{status}'")
+        except Exception as e:
+            logger.error(f"❌ Gagal update_car_status ID={car_id}: {e}")
+        finally:
+            cursor.close()
+            conn.close()
 
     def track_listings(self, start_id=1):
         conn = get_database_connection()
+        if not conn:
+            logger.error("Koneksi database gagal, tidak bisa memulai tracking.")
+            return
+
         cursor = conn.cursor()
         cursor.execute(f"""
             SELECT id, listing_url, status
@@ -151,7 +207,7 @@ class ListingTrackerCarlistmyPlaywright:
                     if self.page.locator(self.sold_selector).count() > 0:
                         sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
                         if self.sold_text_indicator in sold_text:
-                            logger.info(f"✅ ID={car_id} => Terjual (deteksi teks)")
+                            logger.info(f"✅ ID={car_id} => Terjual (deteksi teks sold)")
                             self.update_car_status(car_id, "sold", datetime.now())
                             continue
 
@@ -170,9 +226,14 @@ class ListingTrackerCarlistmyPlaywright:
 
                 except TimeoutError:
                     logger.warning(f"⚠️ Timeout ID={car_id}, tandai UNKNOWN")
+                    # Screenshot agar tahu kenapa timeout
+                    take_screenshot(self.page, f"timeout_{car_id}")
                     self.update_car_status(car_id, "unknown")
+
                 except Exception as e:
                     logger.error(f"❌ Gagal ID={car_id}: {e}")
+                    # Screenshot error
+                    take_screenshot(self.page, f"error_{car_id}")
                     self.update_car_status(car_id, "unknown")
 
                 self.random_delay()
@@ -180,4 +241,3 @@ class ListingTrackerCarlistmyPlaywright:
             self.quit_browser()
 
         logger.info("✅ Proses tracking selesai.")
-
