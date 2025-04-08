@@ -8,7 +8,9 @@ scrap_service/mudahmy_service/.env
 scrap_service/mudahmy_service_playwright/.env
 scrap_service/imagedownload_service/.env
 scrap_service/listing_tracker_service_carlistmy/.env
+scrap_service/listing_tracker_service_carlistmy_playwright/.env
 scrap_service/listing_tracker_service_mudahmy/.env
+scrap_service/listing_tracker_service_mudahmy_playwright/.env
 __pycache__
 .idea/
 scrap_service/imagedownload_service/storage
@@ -16,3 +18,4 @@ logs
 *.html
 *.png
 scrap_test2_carlistmy
+
