@@ -12,10 +12,13 @@ from scrap_service.listing_tracker_service_mudahmy_playwright.database import ge
 
 load_dotenv()
 
-start_date_str = datetime.now().strftime('%Y-%m-%d')
-log_dir = Path(__file__).resolve().parents[2] / "logs"  # scraping/logs
+START_DATE = datetime.now().strftime('%Y%m%d')
+
+base_dir = Path(__file__).resolve().parents[2]
+log_dir = base_dir / "logs"
 log_dir.mkdir(parents=True, exist_ok=True)
-log_file = log_dir / f"tracker_mudahmy_{start_date_str}.log"
+
+log_file = log_dir / f"tracker_mudahmy_{START_DATE}.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -26,6 +29,20 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger("tracker")
+
+def take_screenshot(page, name: str):
+    try:
+        error_folder_name = datetime.now().strftime('%Y%m%d') + "_error_mudahmy_tracker"
+        screenshot_dir = log_dir / error_folder_name
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.now().strftime('%H%M%S')
+        screenshot_path = screenshot_dir / f"{name}_{timestamp}.png"
+
+        page.screenshot(path=str(screenshot_path))
+        logger.info(f"📸 Screenshot disimpan: {screenshot_path}")
+    except Exception as e:
+        logger.warning(f"❌ Gagal menyimpan screenshot: {e}")
 
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 
@@ -52,7 +69,6 @@ def should_use_proxy():
         os.getenv("PROXY_USERNAME") and
         os.getenv("PROXY_PASSWORD")
     )
-
 
 class ListingTrackerMudahmyPlaywright:
     def __init__(self, batch_size=25):
@@ -94,19 +110,26 @@ class ListingTrackerMudahmyPlaywright:
             locale="en-US",
             timezone_id="Asia/Kuala_Lumpur"
         )
-        self.context.route("**/*", lambda route,
-                                          request: route.abort() if request.resource_type == "image" else route.continue_())
+
+        # memblok resource gambar agar lebih cepat
+        self.context.route(
+            "**/*",
+            lambda route, request: route.abort() if request.resource_type == "image" else route.continue_()
+        )
+
         self.page = self.context.new_page()
         stealth_sync(self.page)
         logger.info("✅ Browser Playwright diinisialisasi.")
 
     def get_current_ip(self):
         try:
-            self.page.goto('https://ip.oxylabs.io')
+            self.page.goto('https://ip.oxylabs.io', timeout=10000)
             ip_text = self.page.inner_text('body').strip()
             logger.info(f"🌐 IP yang digunakan: {ip_text}")
         except Exception as e:
             logger.error(f"Gagal mendapatkan IP saat ini: {e}")
+            # Screenshot jika gagal
+            take_screenshot(self.page, "failed_get_ip")
 
     def quit_browser(self):
         try:
@@ -117,6 +140,7 @@ class ListingTrackerMudahmyPlaywright:
             self.playwright.stop()
         except Exception:
             pass
+        logger.info("🛑 Browser Playwright ditutup.")
 
     def random_delay(self, min_d=3, max_d=7):
         time.sleep(random.uniform(min_d, max_d))
@@ -126,19 +150,31 @@ class ListingTrackerMudahmyPlaywright:
 
     def update_car_status(self, car_id, status, sold_at=None):
         conn = get_database_connection()
+        if not conn:
+            logger.error("Tidak bisa update status, koneksi database gagal.")
+            return
+
         cursor = conn.cursor()
-        cursor.execute(f"""
-            UPDATE {DB_TABLE_PRIMARY}
-            SET status = %s, sold_at = %s, last_scraped_at = %s
-            WHERE id = %s
-        """, (status, sold_at, datetime.now(), car_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
-        logger.info(f"> ID={car_id} => Status diupdate ke '{status}'")
+        try:
+            cursor.execute(f"""
+                UPDATE {DB_TABLE_PRIMARY}
+                SET status = %s, sold_at = %s, last_scraped_at = %s
+                WHERE id = %s
+            """, (status, sold_at, datetime.now(), car_id))
+            conn.commit()
+            logger.info(f"> ID={car_id} => Status diupdate ke '{status}'")
+        except Exception as e:
+            logger.error(f"❌ Error update_car_status untuk ID={car_id}: {e}")
+        finally:
+            cursor.close()
+            conn.close()
 
     def track_listings(self, start_id=1):
         conn = get_database_connection()
+        if not conn:
+            logger.error("Koneksi database gagal, tidak bisa memulai tracking.")
+            return
+
         cursor = conn.cursor()
         cursor.execute(f"""
             SELECT id, listing_url, status
@@ -170,15 +206,18 @@ class ListingTrackerMudahmyPlaywright:
                     logger.info(f"🔎 URL: {current_url}")
                     logger.info(f"🔎 Title: {title}")
 
+                    # Cek redirect
                     if self.is_redirected(title, current_url):
                         self.update_car_status(car_id, "sold", datetime.now())
                         continue
 
+                    # Cek element #ad_view_ad_highlights h1 => menandakan masih aktif
                     if self.page.locator(self.active_selector).count() > 0:
                         logger.info(f"> ID={car_id} => Aktif (H1 ditemukan)")
                         if current_status == "unknown":
                             self.update_car_status(car_id, "active")
                     else:
+                        # Cek teks "This car has already been sold." di page content
                         content = self.page.content().lower()
                         if self.sold_text_indicator.lower() in content:
                             self.update_car_status(car_id, "sold", datetime.now())
@@ -187,6 +226,7 @@ class ListingTrackerMudahmyPlaywright:
 
                 except TimeoutError:
                     logger.warning(f"⚠️ Timeout saat memeriksa ID={car_id}. Coba cek redirect secara manual...")
+                    # Ambil info via evaluate
                     try:
                         current_url = self.page.evaluate("() => window.location.href")
                         title = self.page.evaluate("() => document.title")
@@ -200,10 +240,14 @@ class ListingTrackerMudahmyPlaywright:
                             self.update_car_status(car_id, "unknown")
                     except Exception as inner:
                         logger.error(f"❌ Gagal fallback setelah timeout: {inner}")
+                        # Ambil screenshot
+                        take_screenshot(self.page, f"timeout_fallback_{car_id}")
                         self.update_car_status(car_id, "unknown")
 
                 except Exception as e:
                     logger.error(f"❌ Gagal memeriksa ID={car_id}: {e}")
+                    # Screenshot error
+                    take_screenshot(self.page, f"error_{car_id}")
                     self.update_car_status(car_id, "unknown")
 
                 self.random_delay()
