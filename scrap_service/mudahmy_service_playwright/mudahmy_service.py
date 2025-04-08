@@ -14,26 +14,25 @@ from pathlib import Path
 
 load_dotenv()
 
+
+START_DATE = datetime.now().strftime('%Y%m%d')
+
+
+# ================== Konfigurasi ENV
 DB_TABLE_SCRAP = os.getenv("DB_TABLE_SCRAP", "url")
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history")
 INPUT_FILE = os.getenv("INPUT_FILE", "mudahmy_service_playwright/storage/inputfiles/mudahMY_scraplist.csv")
 
-def should_use_proxy():
-    return (
-        os.getenv("USE_PROXY", "false").lower() == "true" and
-        os.getenv("PROXY_SERVER") and
-        os.getenv("PROXY_USERNAME") and
-        os.getenv("PROXY_PASSWORD")
-    )
 
-base_dir = Path(__file__).resolve().parents[2]
+# ================== Konfigurasi PATH Logging
+base_dir = Path(__file__).resolve().parents[2]   # <--- 2 level di atas file ini
 log_dir = base_dir / "logs"
 log_dir.mkdir(parents=True, exist_ok=True)
 
-start_date_str = datetime.now().strftime('%Y-%m-%d')
-log_file = log_dir / f"scrape_mudahmy_{start_date_str}.log"
+log_file = log_dir / f"scrape_mudahmy_{START_DATE}.log"
 
+# ================== Setup Logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -42,6 +41,30 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+def take_screenshot(page, name):
+    try:
+        # Folder error sesuai TANGGAL sekarang (bisa beda dari START_DATE)
+        error_folder_name = datetime.now().strftime('%Y%m%d') + "_error_mudahmy"
+        screenshot_dir = log_dir / error_folder_name
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.now().strftime('%H%M%S')
+        screenshot_path = screenshot_dir / f"{name}_{timestamp}.png"
+
+        page.screenshot(path=str(screenshot_path))
+        logging.info(f"📸 Screenshot disimpan: {screenshot_path}")
+    except Exception as e:
+        logging.warning(f"❌ Gagal menyimpan screenshot: {e}")
+
+
+def should_use_proxy():
+    return (
+        os.getenv("USE_PROXY", "false").lower() == "true" and
+        os.getenv("PROXY_SERVER") and
+        os.getenv("PROXY_USERNAME") and
+        os.getenv("PROXY_PASSWORD")
+    )
 
 
 def get_custom_proxy_list():
@@ -65,14 +88,15 @@ class MudahMyService:
         self.stop_flag = False
         self.batch_size = 40
         self.listing_count = 0
+
         self.conn = get_connection()
         self.cursor = self.conn.cursor()
+
         self.custom_proxies = get_custom_proxy_list()
         self.proxy_index = 0
 
     def init_browser(self):
         self.playwright = sync_playwright().start()
-
         launch_kwargs = {
             "headless": True,
             "args": [
@@ -117,6 +141,7 @@ class MudahMyService:
         logging.info("🛑 Browser Playwright ditutup.")
 
     def get_current_ip(self, page, retries=3):
+        """Contoh memanggil ip.oxylabs.io untuk cek IP."""
         for attempt in range(1, retries + 1):
             try:
                 page.goto('https://ip.oxylabs.io/', timeout=10000)
@@ -126,33 +151,41 @@ class MudahMyService:
                 return
             except Exception as e:
                 logging.warning(f"Attempt {attempt} gagal mendapatkan IP: {e}")
+                # Jika gagal screenshot pun
+                take_screenshot(page, "failed_get_ip")
                 if attempt == retries:
                     logging.error("Gagal mendapatkan IP setelah beberapa percobaan")
                 else:
                     time.sleep(3)
 
     def scrape_page(self, page, url):
+        """
+        Scrape satu halaman (listing) dan kembalikan daftar URL detail.
+        Jika gagal, kembalikan list kosong.
+        """
         try:
             self.get_current_ip(page)
             delay = random.uniform(3, 7)
             logging.info(f"Menuju {url} (delay {delay:.1f}s)")
             time.sleep(delay)
             page.goto(url, timeout=60000)
-            
+
+            # Contoh deteksi blocked
             if page.locator("text='Access Denied'").is_visible(timeout=3000):
                 raise Exception("Akses ditolak")
             if page.locator("text='Please verify you are human'").is_visible(timeout=3000):
-                page.screenshot(path="captcha_detected.png")
+                take_screenshot(page, "captcha_detected")
                 raise Exception("Deteksi CAPTCHA")
-            
+
             page.wait_for_load_state('networkidle', timeout=15000)
-            
+
+            # Coba beberapa selector
             selectors = [
                 ('css', 'div.flex.flex-col.flex-1.gap-2.self-center div.flex.flex-col a'),
                 ('xpath', '//a[contains(@href,"mudah.my") and contains(@class,"sc-jwKygS")]'),
                 ('xpath', '//div[contains(@class,"listing-item")]//a[contains(@href,"mudah.my")]')
             ]
-            
+
             listings = []
             for strategy, selector in selectors:
                 try:
@@ -166,12 +199,12 @@ class MudahMyService:
                 except Exception as e:
                     logging.warning(f"Selector {selector} gagal: {e}")
                     continue
-            
+
             if not listings:
-                page.screenshot(path="no_listings_found.png")
+                take_screenshot(page, "no_listings_found")
                 logging.warning("Tidak menemukan listing dengan semua selector")
                 return []
-            
+
             urls = []
             for element in listings:
                 href = element.get_attribute('href')
@@ -180,28 +213,28 @@ class MudahMyService:
                         href = urljoin(url, href)
                     if 'mudah.my' in href:
                         urls.append(href)
-            
+
             total_listing = len(list(set(urls)))
             logging.info(f"📄 Ditemukan {total_listing} listing URLs di halaman {url}.")
-            
             return list(set(urls))
-        
+
         except Exception as e:
             logging.error(f"Error saat scraping halaman: {e}")
-            page.screenshot(path=f"error_{datetime.now().strftime('%H%M%S')}.png")
+            take_screenshot(page, f"error_scrape_page")
             return []
 
     def scrape_listing_detail(self, page, url):
+        """Scrape detail listing. Kembalikan dict data, atau None kalau gagal."""
         max_retries = 3
         attempt = 0
         while attempt < max_retries:
             try:
                 logging.info(f"Navigating to detail page: {url} (Attempt {attempt+1})")
                 page.goto(url, wait_until="networkidle", timeout=120000)
-                
+
                 if "Access Denied" in page.title() or "block" in page.url:
                     raise Exception("Blocked by anti-bot protection")
-                
+
                 def safe_extract(selectors, selector_type="css", fallback="N/A"):
                     for selector in selectors:
                         try:
@@ -215,7 +248,7 @@ class MudahMyService:
                         except Exception as e:
                             logging.warning(f"Selector failed: {selector} - {e}")
                     return fallback
-                
+
                 data = {}
                 data["listing_url"] = url
                 data["brand"] = safe_extract([
@@ -273,10 +306,12 @@ class MudahMyService:
                 }""")
                 data["gambar"] = images
                 data["scraped_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
+
                 return data
+
             except Exception as e:
                 logging.error(f"Scraping detail failed: {e}")
+                take_screenshot(page, f"error_scrape_detail")
                 attempt += 1
                 if attempt < max_retries:
                     logging.warning(f"Mencoba ulang detail scraping untuk {url} (Attempt {attempt+1})...")
@@ -308,7 +343,6 @@ class MudahMyService:
                         break
 
                     detail_data = self.scrape_listing_detail(self.page, url)
-
                     if detail_data:
                         max_db_retries = 3
                         for attempt in range(1, max_db_retries + 1):
@@ -329,6 +363,7 @@ class MudahMyService:
                     logging.info(f"Menunggu {delay:.1f} detik sebelum listing berikutnya...")
                     time.sleep(delay)
 
+                    # Re-init browser setiap kali batch_size tercapai
                     if total_scraped % self.batch_size == 0 and total_scraped != 0:
                         logging.info(f"Batch {self.batch_size} listing tercapai, reinit browser.")
                         self.quit_browser()
@@ -349,11 +384,10 @@ class MudahMyService:
         """
         Baca CSV:
           - Jika brand dan model diberikan, mulai scraping dari baris yang cocok,
-            lalu lanjutkan ke seluruh baris berikutnya di CSV.
-          - Jika tidak diberikan, scraping dimulai dari baris pertama.
+            lalu lanjut ke seluruh baris berikutnya.
+          - Jika tidak diberikan, scraping semua brand+model (dari baris pertama).
         """
         self.reset_scraping()
-
         df = pd.read_csv(INPUT_FILE)
 
         if brand and model:
@@ -361,35 +395,29 @@ class MudahMyService:
             matching_rows = df[
                 (df['brand'].str.lower() == brand.lower()) &
                 (df['model'].str.lower() == model.lower())
-                ]
+            ]
             if matching_rows.empty:
                 logging.warning("Brand dan model tidak ditemukan dalam CSV.")
                 return
 
-            # Ambil baris index pertama yang cocok
             start_index = matching_rows.index[0]
-            logging.info(
-                f"Mulai scraping dari baris {start_index} untuk brand={brand}, model={model} (start_page={start_page}).")
+            logging.info(f"Mulai scraping dari baris {start_index} untuk brand={brand}, model={model} (start_page={start_page}).")
 
-            # Mulai dari baris yang cocok, lalu lanjutkan baris berikutnya
             for i in range(start_index, len(df)):
                 row = df.iloc[i]
                 brand_name = row['brand']
                 model_name = row['model']
                 base_url = row['url']
 
-                # Hanya untuk baris pertama (brand & model yang dicari), gunakan start_page
-                # Sisanya reset ke 1
                 if i == start_index:
                     current_page = start_page
                 else:
                     current_page = 1
 
                 logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page={current_page}")
-                total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, current_page)
+                total_scraped, _ = self.scrape_listings_for_brand(base_url, brand_name, model_name, current_page)
                 logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
         else:
-            # Tidak ada filter brand, model => scrape dari awal CSV, page=1
             logging.info("Mulai scraping dari baris pertama (tidak ada filter brand/model).")
             df = df.reset_index(drop=True)
             for i, row in df.iterrows():
@@ -398,7 +426,7 @@ class MudahMyService:
                 base_url = row['url']
 
                 logging.info(f"Mulai scraping brand: {brand_name}, model: {model_name}, start_page=1")
-                total_scraped = self.scrape_listings_for_brand(base_url, brand_name, model_name, 1)
+                total_scraped, _ = self.scrape_listings_for_brand(base_url, brand_name, model_name, 1)
                 logging.info(f"Selesai scraping {brand_name} {model_name}. Total data: {total_scraped}")
 
         logging.info("Proses scraping selesai untuk filter brand/model.")
@@ -415,42 +443,44 @@ class MudahMyService:
     def save_to_db(self, car_data):
         """
         Simpan atau update data mobil ke database.
-        Untuk kolom gambar, kirimkan list Python agar psycopg2 mengonversinya ke TEXT[].
-        Versi akan di-set ke 1 untuk insert baru, dan naik 1 setiap update.
         """
         try:
             self.cursor.execute(
-                "SELECT id, price, version FROM {} WHERE listing_url = %s".format(DB_TABLE_SCRAP),
+                f"SELECT id, price, version FROM {DB_TABLE_SCRAP} WHERE listing_url = %s",
                 (car_data["listing_url"],)
             )
             row = self.cursor.fetchone()
 
-            price_int = int(re.sub(r"[^\d]", "", car_data.get("price", ""))) if car_data.get("price") else 0
-            year_int = int(re.search(r"(\d{4})", car_data.get("year", "")).group(1)) if car_data.get(
-                "year") and re.search(r"(\d{4})", car_data.get("year", "")) else 0
+            # Normalisasi price -> integer
+            price_int = 0
+            if car_data.get("price"):
+                match_price = re.sub(r"[^\d]", "", car_data["price"])  # buang non-digit
+                price_int = int(match_price) if match_price else 0
+
+            # Normalisasi year -> integer
+            year_int = 0
+            if car_data.get("year"):
+                match_year = re.search(r"(\d{4})", car_data["year"])
+                if match_year:
+                    year_int = int(match_year.group(1))
 
             if row:
-                car_id = row[0]
-                old_price = row[1] if row[1] else 0
-                current_version = row[2] if row[2] is not None else 0
+                car_id, old_price, current_version = row
+                old_price = old_price if old_price else 0
+                current_version = current_version if current_version else 0
                 new_price = price_int
+
                 update_query = f"""
                     UPDATE {DB_TABLE_SCRAP}
-                    SET brand = %s,
-                        model = %s,
-                        variant = %s,
-                        informasi_iklan = %s,
-                        lokasi = %s,
-                        price = %s,
-                        year = %s,
-                        millage = %s,
-                        transmission = %s,
-                        seat_capacity = %s,
-                        gambar = %s,
-                        last_scraped_at = %s,
-                        version = %s
-                    WHERE id = %s
+                    SET brand=%s, model=%s, variant=%s,
+                        informasi_iklan=%s, lokasi=%s,
+                        price=%s, year=%s, millage=%s,
+                        transmission=%s, seat_capacity=%s,
+                        gambar=%s, last_scraped_at=%s,
+                        version=%s
+                    WHERE id=%s
                 """
+
                 new_version = current_version + 1
                 self.cursor.execute(update_query, (
                     car_data.get("brand"),
@@ -468,20 +498,23 @@ class MudahMyService:
                     new_version,
                     car_id
                 ))
+
+                # Jika harga berubah, catat di history
                 if new_price != old_price and old_price != 0:
                     insert_history = f"""
                         INSERT INTO {DB_TABLE_HISTORY_PRICE} (car_id, old_price, new_price)
                         VALUES (%s, %s, %s)
                     """
                     self.cursor.execute(insert_history, (car_id, old_price, new_price))
+
             else:
                 insert_query = f"""
                     INSERT INTO {DB_TABLE_SCRAP}
-                        (listing_url, brand, model, variant, informasi_iklan, lokasi, price,
-                         year, millage, transmission, seat_capacity, gambar, version)
+                        (listing_url, brand, model, variant, informasi_iklan, lokasi,
+                         price, year, millage, transmission, seat_capacity, gambar, version)
                     VALUES
-                        (%s, %s, %s, %s, %s, %s, %s,
-                         %s, %s, %s, %s, %s, %s)
+                        (%s, %s, %s, %s, %s, %s,
+                         %s, %s, %s, %s, %s, %s, %s)
                 """
                 self.cursor.execute(insert_query, (
                     car_data["listing_url"],
@@ -498,6 +531,7 @@ class MudahMyService:
                     car_data.get("gambar"),
                     1
                 ))
+
             self.conn.commit()
             logging.info(f"✅ Data untuk listing_url={car_data['listing_url']} berhasil disimpan/diupdate.")
         except Exception as e:
@@ -506,8 +540,7 @@ class MudahMyService:
 
     def sync_to_cars(self):
         """
-        Sinkronisasi data dari tabel {DB_TABLE_SCRAP} ke tabel {DB_TABLE_PRIMARY}.
-        Jika listing_url sudah ada, lakukan update; jika tidak, insert.
+        Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}.
         """
         logging.info(f"Memulai sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}...")
         try:
@@ -516,27 +549,20 @@ class MudahMyService:
             rows = self.cursor.fetchall()
             col_names = [desc[0] for desc in self.cursor.description]
             idx_url = col_names.index("listing_url")
+
             for row in rows:
                 listing_url = row[idx_url]
                 check_query = f"SELECT id FROM {DB_TABLE_PRIMARY} WHERE listing_url = %s"
                 self.cursor.execute(check_query, (listing_url,))
                 result = self.cursor.fetchone()
+
                 if result:
                     update_query = f"""
                         UPDATE {DB_TABLE_PRIMARY}
-                        SET brand = %s,
-                            model = %s,
-                            variant = %s,
-                            informasi_iklan = %s,
-                            lokasi = %s,
-                            price = %s,
-                            year = %s,
-                            millage = %s,
-                            transmission = %s,
-                            seat_capacity = %s,
-                            gambar = %s,
-                            last_scraped_at = %s
-                        WHERE listing_url = %s
+                        SET brand=%s, model=%s, variant=%s, informasi_iklan=%s,
+                            lokasi=%s, price=%s, year=%s, millage=%s, transmission=%s,
+                            seat_capacity=%s, gambar=%s, last_scraped_at=%s
+                        WHERE listing_url=%s
                     """
                     self.cursor.execute(update_query, (
                         row[col_names.index("brand")],
@@ -577,6 +603,7 @@ class MudahMyService:
                         row[col_names.index("gambar")],
                         row[col_names.index("last_scraped_at")]
                     ))
+
             self.conn.commit()
             logging.info(f"Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY} selesai.")
         except Exception as e:
@@ -584,6 +611,9 @@ class MudahMyService:
             logging.error(f"Error saat sinkronisasi data: {e}")
 
     def export_data(self):
+        """
+        Mengambil data dari DB_TABLE_SCRAP dalam bentuk list of dict
+        """
         try:
             query = f"SELECT * FROM {DB_TABLE_SCRAP};"
             self.cursor.execute(query)
@@ -596,6 +626,7 @@ class MudahMyService:
             return []
 
     def close(self):
+        """Tutup browser dan koneksi database."""
         try:
             self.quit_browser()
         except Exception:
