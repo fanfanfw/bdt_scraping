@@ -21,7 +21,8 @@ START_DATE = datetime.now().strftime('%Y%m%d')
 # ================== Konfigurasi ENV
 DB_TABLE_SCRAP = os.getenv("DB_TABLE_SCRAP", "url")
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
-DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history")
+DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history_scrap")
+DB_TABLE_HISTORY_PRICE_COMBINED = os.getenv("DB_TABLE_HISTORY_PRICE_COMBINED", "price_history_combined")
 INPUT_FILE = os.getenv("INPUT_FILE", "mudahmy_service_playwright/storage/inputfiles/mudahMY_scraplist.csv")
 
 
@@ -154,7 +155,7 @@ class MudahMyService:
                 # Jika gagal screenshot pun
                 take_screenshot(page, "failed_get_ip")
                 if attempt == retries:
-                    logging.error("Gagal mendapatkan IP setelah beberapa percobaan")
+                    logging.error("Gagal mendapatkan IP setelah beberapa percoaan")
                 else:
                     time.sleep(3)
 
@@ -540,7 +541,7 @@ class MudahMyService:
 
     def sync_to_cars(self):
         """
-        Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}.
+        Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}, dan sinkronisasi data perubahan harga dari price_history_scrap ke price_history_combined.
         """
         logging.info(f"Memulai sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}...")
         try:
@@ -604,8 +605,21 @@ class MudahMyService:
                         row[col_names.index("last_scraped_at")]
                     ))
 
+            # Sinkronisasi perubahan harga dari price_history_scrap ke price_history_combined
+            sync_price_history_query = f"""
+                INSERT INTO {DB_TABLE_HISTORY_PRICE_COMBINED} (car_id, car_scrap_id, old_price, new_price, changed_at)
+                SELECT c.id, cs.id, phs.old_price, phs.new_price, phs.changed_at
+                FROM {DB_TABLE_HISTORY_PRICE} phs
+                JOIN {DB_TABLE_SCRAP} cs ON phs.car_id = cs.id
+                JOIN {DB_TABLE_PRIMARY} c ON cs.listing_url = c.listing_url
+                WHERE phs.car_id IS NOT NULL;
+            """
+            self.cursor.execute(sync_price_history_query)
+
+            # Commit perubahan ke database
             self.conn.commit()
             logging.info(f"Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY} selesai.")
+            logging.info("Sinkronisasi perubahan harga dari price_history_scrap ke price_history_combined selesai.")
         except Exception as e:
             self.conn.rollback()
             logging.error(f"Error saat sinkronisasi data: {e}")

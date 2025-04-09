@@ -21,6 +21,7 @@ START_DATE = datetime.now().strftime('%Y%m%d')
 DB_TABLE_SCRAP = os.getenv("DB_TABLE_SCRAP", "cars_scrap")
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
 DB_TABLE_HISTORY_PRICE = os.getenv("DB_TABLE_HISTORY_PRICE", "price_history")
+DB_TABLE_HISTORY_PRICE_COMBINED = os.getenv("DB_TABLE_HISTORY_PRICE_COMBINED", "price_history_combined")
 INPUT_FILE = os.getenv("INPUT_FILE")
 
 USE_PROXY = os.getenv("USE_PROXY", "false").lower() == "true"
@@ -369,47 +370,90 @@ class CarlistMyService:
         logging.info("✅ Semua brand telah selesai diproses.")
 
     def sync_to_cars(self):
+        """
+        Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}, d
+        an sinkronisasi perubahan harga dari price_history ke price_history_combined.
+        """
+        logging.info(f"Memulai sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}...")
         try:
-            logging.info(f"🔄 Sinkronisasi dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY}")
-            self.cursor.execute(f"SELECT * FROM {DB_TABLE_SCRAP}")
+            # Sinkronisasi data dari cars_scrap ke cars (update atau insert data mobil)
+            fetch_query = f"SELECT * FROM {DB_TABLE_SCRAP};"
+            self.cursor.execute(fetch_query)
             rows = self.cursor.fetchall()
-            columns = [desc[0] for desc in self.cursor.description]
+            col_names = [desc[0] for desc in self.cursor.description]
+            idx_url = col_names.index("listing_url")
 
             for row in rows:
-                data = dict(zip(columns, row))
-                self.cursor.execute(f"SELECT id FROM {DB_TABLE_PRIMARY} WHERE listing_url = %s", (data["listing_url"],))
-                exists = self.cursor.fetchone()
+                listing_url = row[idx_url]
+                check_query = f"SELECT id FROM {DB_TABLE_PRIMARY} WHERE listing_url = %s"
+                self.cursor.execute(check_query, (listing_url,))
+                result = self.cursor.fetchone()
 
-                if exists:
-                    self.cursor.execute(f"""
+                if result:
+                    update_query = f"""
                         UPDATE {DB_TABLE_PRIMARY}
                         SET brand=%s, model=%s, variant=%s, informasi_iklan=%s,
                             lokasi=%s, price=%s, year=%s, millage=%s, transmission=%s,
                             seat_capacity=%s, gambar=%s, last_scraped_at=%s
                         WHERE listing_url=%s
-                    """, (
-                        data["brand"], data["model"], data["variant"], data["informasi_iklan"],
-                        data["lokasi"], data["price"], data["year"], data["millage"],
-                        data["transmission"], data["seat_capacity"], data["gambar"],
-                        data["last_scraped_at"], data["listing_url"]
+                    """
+                    self.cursor.execute(update_query, (
+                        row[col_names.index("brand")],
+                        row[col_names.index("model")],
+                        row[col_names.index("variant")],
+                        row[col_names.index("informasi_iklan")],
+                        row[col_names.index("lokasi")],
+                        row[col_names.index("price")],
+                        row[col_names.index("year")],
+                        row[col_names.index("millage")],
+                        row[col_names.index("transmission")],
+                        row[col_names.index("seat_capacity")],
+                        row[col_names.index("gambar")],
+                        row[col_names.index("last_scraped_at")],
+                        listing_url
                     ))
                 else:
-                    self.cursor.execute(f"""
-                        INSERT INTO {DB_TABLE_PRIMARY} (
-                            listing_url, brand, model, variant, informasi_iklan, lokasi,
-                            price, year, millage, transmission, seat_capacity, gambar, last_scraped_at
-                        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    """, (
-                        data["listing_url"], data["brand"], data["model"], data["variant"],
-                        data["informasi_iklan"], data["lokasi"], data["price"], data["year"],
-                        data["millage"], data["transmission"], data["seat_capacity"], data["gambar"],
-                        data["last_scraped_at"]
+                    insert_query = f"""
+                        INSERT INTO {DB_TABLE_PRIMARY}
+                            (listing_url, brand, model, variant, informasi_iklan, lokasi,
+                             price, year, millage, transmission, seat_capacity, gambar, last_scraped_at)
+                        VALUES
+                            (%s, %s, %s, %s, %s, %s,
+                             %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    self.cursor.execute(insert_query, (
+                        listing_url,
+                        row[col_names.index("brand")],
+                        row[col_names.index("model")],
+                        row[col_names.index("variant")],
+                        row[col_names.index("informasi_iklan")],
+                        row[col_names.index("lokasi")],
+                        row[col_names.index("price")],
+                        row[col_names.index("year")],
+                        row[col_names.index("millage")],
+                        row[col_names.index("transmission")],
+                        row[col_names.index("seat_capacity")],
+                        row[col_names.index("gambar")],
+                        row[col_names.index("last_scraped_at")]
                     ))
+
+            # Sinkronisasi perubahan harga dari price_history ke price_history_combined
+            sync_price_history_query = f"""
+                INSERT INTO {DB_TABLE_HISTORY_PRICE_COMBINED} (car_id, car_scrap_id, old_price, new_price, changed_at)
+                SELECT c.id, cs.id, ph.old_price, ph.new_price, ph.changed_at
+                FROM {DB_TABLE_HISTORY_PRICE} ph
+                JOIN {DB_TABLE_SCRAP} cs ON ph.car_id = cs.id
+                JOIN {DB_TABLE_PRIMARY} c ON cs.listing_url = c.listing_url
+                WHERE ph.car_id IS NOT NULL;
+            """
+            self.cursor.execute(sync_price_history_query)
+
             self.conn.commit()
-            logging.info("✅ Sinkronisasi selesai.")
+            logging.info(f"Sinkronisasi data dari {DB_TABLE_SCRAP} ke {DB_TABLE_PRIMARY} selesai.")
+            logging.info("Sinkronisasi perubahan harga dari price_history ke price_history_combined selesai.")
         except Exception as e:
             self.conn.rollback()
-            logging.error(f"❌ Error saat sync: {e}")
+            logging.error(f"Error saat sinkronisasi data: {e}")
 
     def export_data(self):
         try:
