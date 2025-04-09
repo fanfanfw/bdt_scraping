@@ -76,8 +76,29 @@ class ListingTrackerCarlistmyPlaywright:
         self.sold_selector = "h2"
         self.sold_text_indicator = "This car has already been sold."
         self.active_selector = "h1"
-        # Tambahkan proxies custom
         self.custom_proxies = get_custom_proxy_list()
+        self.session_id = self.generate_session_id()
+
+    def generate_session_id(self):
+        return ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+
+    def build_proxy_config(self):
+        proxy_mode = os.getenv("PROXY_MODE", "none").lower()
+
+        if proxy_mode == "oxylabs":
+            username_base = os.getenv("PROXY_USERNAME", "")
+            return {
+                "server": os.getenv("PROXY_SERVER"),
+                "username": f"{username_base}-sessid-{self.session_id}",
+                "password": os.getenv("PROXY_PASSWORD")
+            }
+
+        elif proxy_mode == "custom" and self.custom_proxies:
+            proxy = random.choice(self.custom_proxies)
+            return proxy
+
+        else:
+            return None
 
     def init_browser(self):
         self.playwright = sync_playwright().start()
@@ -87,47 +108,60 @@ class ListingTrackerCarlistmyPlaywright:
             "args": ["--disable-blink-features=AutomationControlled", "--no-sandbox"]
         }
 
-        proxy_mode = os.getenv("PROXY_MODE", "none").lower()
-        if proxy_mode == "oxylabs":
-            launch_kwargs["proxy"] = {
-                "server": os.getenv("PROXY_SERVER"),
-                "username": os.getenv("PROXY_USERNAME"),
-                "password": os.getenv("PROXY_PASSWORD")
-            }
-            logger.info("🌐 Proxy aktif (Oxylabs digunakan)")
-        elif proxy_mode == "custom" and self.custom_proxies:
-            proxy = random.choice(self.custom_proxies)
+        proxy = self.build_proxy_config()
+        if proxy:
             launch_kwargs["proxy"] = proxy
-            logger.info(f"🌐 Proxy custom digunakan (random): {proxy['server']}")
+            logging.info(f"🌐 Proxy digunakan: {proxy['server']}")
         else:
-            logger.info("⚡ Menjalankan browser tanpa proxy")
+            logging.info("⚡ Browser dijalankan tanpa proxy")
 
         self.browser = self.playwright.chromium.launch(**launch_kwargs)
+
         self.context = self.browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
             viewport={"width": 1366, "height": 768},
             locale="en-US",
-            timezone_id="Asia/Kuala_Lumpur"
+            timezone_id="Asia/Kuala_Lumpur",
+            geolocation={"longitude": 101.68627540160966, "latitude": 3.1504925396418315},
+            permissions=["geolocation"]
         )
 
-        self.context.route(
-            "**/*",
-            lambda route, request: route.abort() if request.resource_type == "image" else route.continue_()
-        )
+        self.context.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
 
         self.page = self.context.new_page()
         stealth_sync(self.page)
-        logger.info("✅ Browser Playwright diinisialisasi.")
+        logging.info("✅ Browser Playwright berhasil diinisialisasi.")
 
-    def get_current_ip(self):
+    def detect_anti_bot(self):
         try:
-            self.page.goto('https://ip.oxylabs.io/', timeout=15000)
-            ip_text = self.page.inner_text('body').strip()
-            logger.info(f"🌐 IP yang digunakan: {ip_text}")
+            content = self.page.content()
+            if "Checking your browser before accessing" in content or "cf-browser-verification" in content or "Server Error" in content:
+                take_screenshot(self.page, "cloudflare_block")
+                logging.warning("⚠️ Deteksi proteksi Cloudflare atau error server. Akan ganti proxy dan retry.")
+                return True
+            return False
         except Exception as e:
-            logger.error(f"Gagal mendapatkan IP saat ini: {e}")
-            # Screenshot saat gagal
-            take_screenshot(self.page, "failed_get_ip")
+            logging.warning(f"❌ Gagal cek anti-bot: {e}")
+
+    def retry_with_new_proxy(self):
+        self.quit_browser()
+        self.session_id = self.generate_session_id()
+        self.init_browser()
+        self.get_current_ip()
+        logging.info("🔁 Browser reinit dengan session proxy baru.")
+
+    def get_current_ip(self, retries=3):
+        for attempt in range(retries):
+            try:
+                self.page.goto("https://ip.oxylabs.io/", timeout=10000)
+                ip = self.page.inner_text("body").strip()
+                logging.info(f"🌐 IP yang digunakan: {ip}")
+                return ip
+            except Exception as e:
+                logging.warning(f"Gagal mengambil IP (percobaan {attempt + 1}/{retries}): {e}")
+                if attempt < retries - 1:
+                    time.sleep(7)
+        raise Exception("Gagal mengambil IP setelah beberapa retry.")
 
     def quit_browser(self):
         try:
@@ -140,7 +174,7 @@ class ListingTrackerCarlistmyPlaywright:
             pass
         logger.info("🛑 Browser Playwright ditutup.")
 
-    def random_delay(self, min_d=2, max_d=5):
+    def random_delay(self, min_d=3, max_d=7):
         time.sleep(random.uniform(min_d, max_d))
 
     def update_car_status(self, car_id, status, sold_at=None):
@@ -194,6 +228,11 @@ class ListingTrackerCarlistmyPlaywright:
                     time.sleep(2)
                     self.page.evaluate("window.scrollTo(0, 1000)")
                     self.random_delay()
+
+                    if self.detect_anti_bot():
+                        self.retry_with_new_proxy()
+                        self.page.goto(url, timeout=40000)
+                        time.sleep(3)
 
                     not_found_selector = "h1.zeta.alert.alert--warning"
                     not_found_text = "Page not found."
