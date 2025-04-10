@@ -157,10 +157,15 @@ class ListingTrackerCarlistmyPlaywright:
                 ip = self.page.inner_text("body").strip()
                 logging.info(f"🌐 IP yang digunakan: {ip}")
                 return ip
+            except TimeoutError as e:
+                logging.warning(f"Gagal mengambil IP (percobaan {attempt + 1}/{retries}): Timeout. {e}")
             except Exception as e:
                 logging.warning(f"Gagal mengambil IP (percobaan {attempt + 1}/{retries}): {e}")
-                if attempt < retries - 1:
-                    time.sleep(7)
+
+            if attempt < retries - 1:
+                logging.info(f"Retrying... Percobaan {attempt + 2}/{retries}")
+                time.sleep(7)  # Delay antara retry
+        logging.error("Gagal mengambil IP setelah beberapa percobaan. Program dihentikan.")
         raise Exception("Gagal mengambil IP setelah beberapa retry.")
 
     def quit_browser(self):
