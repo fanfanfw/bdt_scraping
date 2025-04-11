@@ -15,7 +15,7 @@ load_dotenv()
 START_DATE = datetime.now().strftime('%Y%m%d')
 
 base_dir = Path(__file__).resolve().parents[2]
-log_dir = base_dir / "scraping" / "logs"
+log_dir = base_dir / "logs"
 log_dir.mkdir(parents=True, exist_ok=True)
 
 log_file = log_dir / f"tracker_carlistmy_{START_DATE}.log"
