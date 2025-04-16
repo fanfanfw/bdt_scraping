@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, TimeoutError
 from playwright_stealth import stealth_sync
 from pathlib import Path
+import sys
 
 from scrap_service.listing_tracker_service_carlistmy_playwright.database import get_database_connection
 
@@ -147,26 +148,7 @@ class ListingTrackerCarlistmyPlaywright:
         self.quit_browser()
         self.session_id = self.generate_session_id()
         self.init_browser()
-        self.get_current_ip()
         logging.info("🔁 Browser reinit dengan session proxy baru.")
-
-    def get_current_ip(self, retries=3):
-        for attempt in range(retries):
-            try:
-                self.page.goto("https://ip.oxylabs.io/", timeout=10000)
-                ip = self.page.inner_text("body").strip()
-                logging.info(f"🌐 IP yang digunakan: {ip}")
-                return ip
-            except TimeoutError as e:
-                logging.warning(f"Gagal mengambil IP (percobaan {attempt + 1}/{retries}): Timeout. {e}")
-            except Exception as e:
-                logging.warning(f"Gagal mengambil IP (percobaan {attempt + 1}/{retries}): {e}")
-
-            if attempt < retries - 1:
-                logging.info(f"Retrying... Percobaan {attempt + 2}/{retries}")
-                time.sleep(7)  # Delay antara retry
-        logging.error("Gagal mengambil IP setelah beberapa percobaan. Program dihentikan.")
-        raise Exception("Gagal mengambil IP setelah beberapa retry.")
 
     def quit_browser(self):
         try:
@@ -189,13 +171,17 @@ class ListingTrackerCarlistmyPlaywright:
             return
         cursor = conn.cursor()
         try:
+            now = datetime.now()
             cursor.execute(f"""
                 UPDATE {DB_TABLE_PRIMARY}
-                SET status = %s, sold_at = %s, last_scraped_at = %s
+                SET status = %s,
+                    sold_at = %s,
+                    last_scraped_at = %s,
+                    last_status_check = %s
                 WHERE id = %s
-            """, (status, sold_at, datetime.now(), car_id))
+            """, (status, sold_at, now, now, car_id))
             conn.commit()
-            logger.info(f"> ID={car_id} => Status diupdate ke '{status}'")
+            logger.info(f"> ID={car_id} => Status diupdate ke '{status}', waktu cek status diset ke {now}")
         except Exception as e:
             logger.error(f"❌ Gagal update_car_status ID={car_id}: {e}")
         finally:
@@ -221,67 +207,76 @@ class ListingTrackerCarlistmyPlaywright:
 
         logger.info(f"📄 Total data: {len(listings)}")
 
-        for i in range(0, len(listings), self.batch_size):
-            batch = listings[i:i + self.batch_size]
+        for car_id, url, current_status in listings:
+            logger.info(f"🔍 Memeriksa ID={car_id} - {url}")
             self.init_browser()
-            self.get_current_ip()
 
-            for car_id, url, current_status in batch:
-                logger.info(f"🔍 Memeriksa ID={car_id} - {url}")
-                try:
-                    self.page.goto(url, timeout=30000)
-                    time.sleep(2)
-                    self.page.evaluate("window.scrollTo(0, 1000)")
-                    self.random_delay()
-
-                    if self.detect_anti_bot():
-                        self.retry_with_new_proxy()
-                        self.page.goto(url, timeout=40000)
-                        time.sleep(3)
-
-                    not_found_selector = "h1.zeta.alert.alert--warning"
-                    not_found_text = "Page not found."
-                    if self.page.locator(not_found_selector).count() > 0:
-                        text_found = self.page.locator(not_found_selector).first.inner_text().strip()
-                        if not_found_text in text_found:
-                            logger.info(f"404 ID={car_id} => Halaman tidak ditemukan, tandai UNKNOWN")
-                            self.update_car_status(car_id, "unknown")
-                            continue
-
-                    if self.page.locator(self.sold_selector).count() > 0:
-                        sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
-                        if self.sold_text_indicator in sold_text:
-                            logger.info(f"✅ ID={car_id} => Terjual (deteksi teks sold)")
-                            self.update_car_status(car_id, "sold", datetime.now())
-                            continue
-
-                    if self.page.locator(self.active_selector).count() > 0:
-                        logger.info(f"> ID={car_id} => Aktif (judul ditemukan)")
-                        if current_status == "unknown":
-                            self.update_car_status(car_id, "active")
-                        continue
-
-                    content = self.page.content().lower()
-                    if self.sold_text_indicator.lower() in content:
-                        logger.info(f"🕵️ ID={car_id} => Terjual (fallback by content)")
-                        self.update_car_status(car_id, "sold", datetime.now())
-                    else:
-                        self.update_car_status(car_id, "unknown")
-
-                except TimeoutError:
-                    logger.warning(f"⚠️ Timeout ID={car_id}, tandai UNKNOWN")
-                    # Screenshot agar tahu kenapa timeout
-                    take_screenshot(self.page, f"timeout_{car_id}")
-                    self.update_car_status(car_id, "unknown")
-
-                except Exception as e:
-                    logger.error(f"❌ Gagal ID={car_id}: {e}")
-                    # Screenshot error
-                    take_screenshot(self.page, f"error_{car_id}")
-                    self.update_car_status(car_id, "unknown")
-
+            try:
+                self.page.goto(url, timeout=30000)
+                time.sleep(2)
+                self.page.evaluate("window.scrollTo(0, 1000)")
                 self.random_delay()
 
-            self.quit_browser()
+                # Anti-bot error handling
+                try:
+                    content = self.page.content()
+                except Exception as e:
+                    take_screenshot(self.page, f"antibot_{car_id}")
+                    logger.error(f"❌ Gagal cek anti-bot: {e}")
+                    self.quit_browser()
+                    sys.exit(1)
+
+                if self.detect_anti_bot():
+                    self.retry_with_new_proxy()
+                    self.page.goto(url, timeout=40000)
+                    time.sleep(3)
+
+                # 404 Not Found
+                not_found_selector = "h1.zeta.alert.alert--warning"
+                not_found_text = "Page not found."
+                if self.page.locator(not_found_selector).count() > 0:
+                    text_found = self.page.locator(not_found_selector).first.inner_text().strip()
+                    if not_found_text in text_found:
+                        logger.info(f"404 ID={car_id} => Halaman tidak ditemukan, tandai UNKNOWN")
+                        self.update_car_status(car_id, "unknown")
+                        self.quit_browser()
+                        continue
+
+                # Sold (dari heading)
+                if self.page.locator(self.sold_selector).count() > 0:
+                    sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
+                    if self.sold_text_indicator in sold_text:
+                        logger.info(f"✅ ID={car_id} => Terjual (deteksi teks sold)")
+                        self.update_car_status(car_id, "sold", datetime.now())
+                        self.quit_browser()
+                        continue
+
+                # Active (dari judul)
+                if self.page.locator(self.active_selector).count() > 0:
+                    logger.info(f"> ID={car_id} => Aktif (judul ditemukan)")
+                    self.update_car_status(car_id, "active")  # SELALU update, meskipun status tidak berubah
+                    self.quit_browser()
+                    continue
+
+                # Fallback: cek konten
+                content = self.page.content().lower()
+                if self.sold_text_indicator.lower() in content:
+                    logger.info(f"🕵️ ID={car_id} => Terjual (fallback by content)")
+                    self.update_car_status(car_id, "sold", datetime.now())
+                else:
+                    self.update_car_status(car_id, "unknown")
+
+            except TimeoutError:
+                logger.warning(f"⚠️ Timeout ID={car_id}, tandai UNKNOWN")
+                take_screenshot(self.page, f"timeout_{car_id}")
+                self.update_car_status(car_id, "unknown")
+            except Exception as e:
+                logger.error(f"❌ Gagal ID={car_id}: {e}")
+                take_screenshot(self.page, f"error_{car_id}")
+                self.update_car_status(car_id, "unknown")
+            finally:
+                self.quit_browser()
+
+            self.random_delay()
 
         logger.info("✅ Proses tracking selesai.")
