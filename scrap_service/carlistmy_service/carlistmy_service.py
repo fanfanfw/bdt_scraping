@@ -15,7 +15,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
 
-from database import get_connection
+from scrap_service.carlistmy_service.database import get_connection
 
 log_folder = "logs"
 os.makedirs(log_folder, exist_ok=True)
@@ -300,7 +300,6 @@ class CarlistMyService:
             time.sleep(3)
 
             try:
-                # Tunggu elemen muncul (gunakan CSS selector seperti yang kamu sebut)
                 WebDriverWait(self.driver, 10).until(
                     EC.presence_of_element_located(
                         (By.CSS_SELECTOR, "#classified-listings-result > div.masthead.push--bottom > div > h1"))
@@ -395,7 +394,7 @@ class CarlistMyService:
                         break
 
                     if page == 1:
-                        total_target = self.get_total_listing_count()
+                        total_target = self.get_total_listing_count(base_url)
                         logging.info(f"📊 Total listing untuk brand {brand}: {total_target}")
 
                     html = self.driver.page_source
