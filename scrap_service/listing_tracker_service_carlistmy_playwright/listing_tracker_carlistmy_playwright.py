@@ -45,7 +45,9 @@ def take_screenshot(page, name: str):
     except Exception as e:
         logger.warning(f"❌ Gagal menyimpan screenshot: {e}")
 
+
 DB_TABLE_PRIMARY = os.getenv("DB_TABLE_PRIMARY", "cars")
+
 
 def get_custom_proxy_list():
     raw = os.getenv("CUSTOM_PROXIES", "")
@@ -63,6 +65,7 @@ def get_custom_proxy_list():
             continue
     return parsed
 
+
 def should_use_proxy():
     return (
         os.getenv("USE_PROXY", "false").lower() == "true"
@@ -70,6 +73,7 @@ def should_use_proxy():
         and os.getenv("PROXY_USERNAME")
         and os.getenv("PROXY_PASSWORD")
     )
+
 
 class ListingTrackerCarlistmyPlaywright:
     def __init__(self, batch_size=25):
@@ -105,7 +109,8 @@ class ListingTrackerCarlistmyPlaywright:
         self.playwright = sync_playwright().start()
 
         launch_kwargs = {
-            "headless": True,
+            # Saat debugging, set headless=False agar terlihat prosesnya
+            "headless": False,
             "args": ["--disable-blink-features=AutomationControlled", "--no-sandbox"]
         }
 
@@ -127,7 +132,8 @@ class ListingTrackerCarlistmyPlaywright:
             permissions=["geolocation"]
         )
 
-        self.context.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
+        # Saat debugging, komentar baris ini jika perlu memuat gambar agar page load-nya tidak menunggu terlalu lama
+        # self.context.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
 
         self.page = self.context.new_page()
         stealth_sync(self.page)
@@ -136,7 +142,9 @@ class ListingTrackerCarlistmyPlaywright:
     def detect_anti_bot(self):
         try:
             content = self.page.content()
-            if "Checking your browser before accessing" in content or "cf-browser-verification" in content or "Server Error" in content:
+            if ("Checking your browser before accessing" in content
+                or "cf-browser-verification" in content
+                or "Server Error" in content):
                 take_screenshot(self.page, "cloudflare_block")
                 logging.warning("⚠️ Deteksi proteksi Cloudflare atau error server. Akan ganti proxy dan retry.")
                 return True
@@ -207,13 +215,16 @@ class ListingTrackerCarlistmyPlaywright:
 
         logger.info(f"📄 Total data: {len(listings)}")
 
+        # 1) Buka browser sekali saja.
+        self.init_browser()
+
         for car_id, url, current_status in listings:
             logger.info(f"🔍 Memeriksa ID={car_id} - {url}")
-            self.init_browser()
 
             try:
-                self.page.goto(url, timeout=30000)
-                time.sleep(2)
+                # 2) Gunakan wait_until=domcontentloaded + timeout lebih lama
+                self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                time.sleep(2)  # bisa diganti self.random_delay() juga
                 self.page.evaluate("window.scrollTo(0, 1000)")
                 self.random_delay()
 
@@ -223,12 +234,14 @@ class ListingTrackerCarlistmyPlaywright:
                 except Exception as e:
                     take_screenshot(self.page, f"antibot_{car_id}")
                     logger.error(f"❌ Gagal cek anti-bot: {e}")
-                    self.quit_browser()
-                    sys.exit(1)
+                    # Boleh di-continue atau langsung break/exit sesuai kebutuhan
+                    continue
 
+                # Jika terdeteksi CF-block, ganti proxy
                 if self.detect_anti_bot():
                     self.retry_with_new_proxy()
-                    self.page.goto(url, timeout=40000)
+                    # Karena kita reinit browser, self.page berubah.
+                    self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
                     time.sleep(3)
 
                 # 404 Not Found
@@ -239,7 +252,7 @@ class ListingTrackerCarlistmyPlaywright:
                     if not_found_text in text_found:
                         logger.info(f"404 ID={car_id} => Halaman tidak ditemukan, tandai UNKNOWN")
                         self.update_car_status(car_id, "unknown")
-                        self.quit_browser()
+                        # Lanjut ke listing berikutnya
                         continue
 
                 # Sold (dari heading)
@@ -248,19 +261,17 @@ class ListingTrackerCarlistmyPlaywright:
                     if self.sold_text_indicator in sold_text:
                         logger.info(f"✅ ID={car_id} => Terjual (deteksi teks sold)")
                         self.update_car_status(car_id, "sold", datetime.now())
-                        self.quit_browser()
                         continue
 
                 # Active (dari judul)
                 if self.page.locator(self.active_selector).count() > 0:
                     logger.info(f"> ID={car_id} => Aktif (judul ditemukan)")
-                    self.update_car_status(car_id, "active")  # SELALU update, meskipun status tidak berubah
-                    self.quit_browser()
+                    self.update_car_status(car_id, "active")
                     continue
 
                 # Fallback: cek konten
-                content = self.page.content().lower()
-                if self.sold_text_indicator.lower() in content:
+                content_lower = self.page.content().lower()
+                if self.sold_text_indicator.lower() in content_lower:
                     logger.info(f"🕵️ ID={car_id} => Terjual (fallback by content)")
                     self.update_car_status(car_id, "sold", datetime.now())
                 else:
@@ -275,8 +286,14 @@ class ListingTrackerCarlistmyPlaywright:
                 take_screenshot(self.page, f"error_{car_id}")
                 self.update_car_status(car_id, "unknown")
             finally:
-                self.quit_browser()
+                # Jika Anda tidak mau menutup browser di setiap loop,
+                # cukup kosongkan block finally atau tangani hal-hal lain di sini.
+                pass
 
-            self.random_delay()
+            # 3) Jeda antar listing agar tidak terlalu agresif
+            self.random_delay(min_d=3, max_d=7)
+
+        # 4) Baru tutup browser kalau semua listing selesai
+        self.quit_browser()
 
         logger.info("✅ Proses tracking selesai.")
