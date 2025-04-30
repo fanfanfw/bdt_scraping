@@ -111,7 +111,7 @@ class ListingTrackerMudahmyPlaywright:
         self.playwright = sync_playwright().start()
 
         launch_kwargs = {
-            "headless": False,
+            "headless": True,
             "args": [
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
@@ -275,8 +275,7 @@ class ListingTrackerMudahmyPlaywright:
 
                     if self.page.locator(self.active_selector).count() > 0:
                         logger.info(f"> ID={car_id} => Aktif (H1 ditemukan)")
-                        if current_status == "unknown":
-                            self.update_car_status(car_id, "active")
+                        self.update_car_status(car_id, "active")
                     else:
                         content = self.page.content().lower()
                         if self.sold_text_indicator.lower() in content:
