@@ -193,8 +193,10 @@ class ListingTrackerMudahmyPlaywright:
             pass
         logger.info("🛑 Browser Playwright ditutup.")
 
-    def random_delay(self, min_d=5, max_d=7):
-        time.sleep(random.uniform(min_d, max_d))
+    def random_delay(self, min_d=11, max_d=33):
+        delay = random.uniform(min_d, max_d)
+        logger.info(f"⏱️ Delay acak antar listing: {delay:.2f} detik")
+        time.sleep(delay)
 
     def is_redirected(self, title, url):
         title = title.lower().strip()
@@ -312,9 +314,14 @@ class ListingTrackerMudahmyPlaywright:
 
                 self.random_delay()
 
+                if url_count % random.randint(5, 9) == 0:
+                    pause_duration = random.uniform(20, 60)
+                    logger.info(f"⏸️ Mini pause {pause_duration:.2f} detik untuk menghindari deteksi bot...")
+                    time.sleep(pause_duration)
+
                 url_count += 1
-                if url_count % 100 == 0:
-                    break_time = random.uniform(60, 180)  # 1-2 jam dalam detik
+                if url_count % 25 == 0:
+                    break_time = random.uniform(606, 1122)  # 1-2 jam dalam detik
                     logger.info(f"💤 Sudah memeriksa {url_count} URL. Istirahat selama {break_time / 3600:.2f} jam...")
                     time.sleep(break_time)
 
