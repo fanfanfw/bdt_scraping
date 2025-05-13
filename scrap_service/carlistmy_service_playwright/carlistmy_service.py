@@ -119,7 +119,7 @@ class CarlistMyService:
         self.playwright = sync_playwright().start()
 
         launch_kwargs = {
-            "headless": True,
+            "headless": False,
             "args": [
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
@@ -134,16 +134,18 @@ class CarlistMyService:
         self.browser = self.playwright.chromium.launch(**launch_kwargs)
 
         self.context = self.browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
             locale="en-US",
             timezone_id="Asia/Kuala_Lumpur",
             geolocation={"longitude": 101.68627540160966, "latitude": 3.1504925396418315},
             permissions=["geolocation"],
+            viewport={"width": 1920, "height": 1080},  # Set to full page size
         )
 
         self.page = self.context.new_page()
         stealth_sync(self.page)
         logging.info("✅ Browser Playwright berhasil diinisialisasi dengan stealth.")
+
 
     def detect_anti_bot(self):
         content = self.page.content()
@@ -185,55 +187,73 @@ class CarlistMyService:
         raise Exception("Gagal mengambil IP setelah beberapa retry.")
 
     def scrape_detail(self, url):
-        try:
-            self.page.goto(url, wait_until="networkidle", timeout=60000)
-            time.sleep(7)
-            soup = BeautifulSoup(self.page.content(), "html.parser")
+        max_retries = 3
+        retry_count = 0
 
-            def extract(selector):
-                element = soup.select_one(selector)
-                return element.text.strip() if element else None
+        while retry_count < max_retries:
+            try:
+                self.page.goto(url, wait_until="networkidle", timeout=60000)
+                time.sleep(7)
 
-            brand = extract("#listing-detail li:nth-child(3) > a > span")
-            model = extract("#listing-detail li:nth-child(4) > a > span")
-            variant = extract("#listing-detail li:nth-child(5) > a > span")
-            informasi_iklan = extract("div:nth-child(1) > span.u-color-muted")
-            lokasi_part1 = extract("div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
-            lokasi_part2 = extract("div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
-            lokasi = " - ".join(filter(None, [lokasi_part1, lokasi_part2]))
+                # Cek jika halaman diblokir Cloudflare
+                page_title = self.page.title()
+                if page_title.strip() == "Just a moment...":
+                    logging.warning("🛑 Halaman diblokir Cloudflare. Mengganti proxy dan retry...")
+                    take_screenshot(self.page, "cloudflare_detected")
+                    retry_count += 1
+                    self.retry_with_new_proxy()
+                    continue  # Coba ulang URL yang sama
+                else:
+                    # Lanjutkan parsing HTML
+                    soup = BeautifulSoup(self.page.content(), "html.parser")
 
-            price_string = extract("div.listing__item-price > h3")
-            year = extract("div.owl-stage div:nth-child(2) span.u-text-bold")
-            millage = extract("div.owl-stage div:nth-child(3) span.u-text-bold")
-            transmission = extract("div.owl-stage div:nth-child(6) span.u-text-bold")
-            seat_capacity = extract("div.owl-stage div:nth-child(7) span.u-text-bold")
+                    def extract(selector):
+                        element = soup.select_one(selector)
+                        return element.text.strip() if element else None
 
-            img_tags = soup.select("#details-gallery img")
-            gambar = [img.get("src") for img in img_tags if img.get("src")]
+                    brand = extract("#listing-detail li:nth-child(3) > a > span")
+                    model = extract("#listing-detail li:nth-child(4) > a > span")
+                    variant = extract("#listing-detail li:nth-child(5) > a > span")
+                    informasi_iklan = extract("div:nth-child(1) > span.u-color-muted")
+                    lokasi_part1 = extract("div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
+                    lokasi_part2 = extract("div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
+                    lokasi = " - ".join(filter(None, [lokasi_part1, lokasi_part2]))
 
-            import re
-            price = int(re.sub(r"[^\d]", "", price_string)) if price_string else 0
-            year_int = int(re.search(r"\d{4}", year).group()) if year else 0
+                    price_string = extract("div.listing__item-price > h3")
+                    year = extract("div.owl-stage div:nth-child(2) span.u-text-bold")
+                    millage = extract("div.owl-stage div:nth-child(3) span.u-text-bold")
+                    transmission = extract("div.owl-stage div:nth-child(6) span.u-text-bold")
+                    seat_capacity = extract("div.owl-stage div:nth-child(7) span.u-text-bold")
 
-            return {
-                "listing_url": url,
-                "brand": brand,
-                "model": model,
-                "variant": variant,
-                "informasi_iklan": informasi_iklan,
-                "lokasi": lokasi,
-                "price": price,
-                "year": year_int,
-                "millage": millage,
-                "transmission": transmission,
-                "seat_capacity": seat_capacity,
-                "gambar": gambar,
-            }
+                    img_tags = soup.select("#details-gallery img")
+                    gambar = [img.get("src") for img in img_tags if img.get("src")]
 
-        except Exception as e:
-            logging.error(f"Gagal scraping detail {url}: {e}")
-            take_screenshot(self.page, "scrape_detail_error")
-            return None
+                    price = int(re.sub(r"[^\d]", "", price_string)) if price_string else 0
+                    year_int = int(re.search(r"\d{4}", year).group()) if year else 0
+
+                    return {
+                        "listing_url": url,
+                        "brand": brand,
+                        "model": model,
+                        "variant": variant,
+                        "informasi_iklan": informasi_iklan,
+                        "lokasi": lokasi,
+                        "price": price,
+                        "year": year_int,
+                        "millage": millage,
+                        "transmission": transmission,
+                        "seat_capacity": seat_capacity,
+                        "gambar": gambar,
+                    }
+
+            except Exception as e:
+                logging.error(f"Gagal scraping detail {url}: {e}")
+                take_screenshot(self.page, "scrape_detail_error")
+                retry_count += 1
+                self.retry_with_new_proxy()
+
+        logging.error(f"❌ Gagal mengambil data dari {url} setelah {max_retries} percobaan.")
+        return None
 
     def save_to_db(self, car):
         try:
@@ -342,6 +362,9 @@ class CarlistMyService:
                     take_screenshot(self.page, f"no_listing_page{page}_{brand}")
                     break
 
+                logging.info("⏳ Menunggu selama 15-30 detik sebelum melanjutkan...")
+                time.sleep(random.uniform(17, 39))
+
                 for url in urls:
                     if self.stop_flag:
                         break
@@ -350,7 +373,7 @@ class CarlistMyService:
                     if detail:
                         self.save_to_db(detail)
                         self.listing_count += 1
-                        time.sleep(random.uniform(15, 20))
+                        time.sleep(random.uniform(20, 40))  # Tunggu selama 15-20 detik secara acak antara detail
 
                         if self.listing_count >= self.batch_size:
                             self.quit_browser()
