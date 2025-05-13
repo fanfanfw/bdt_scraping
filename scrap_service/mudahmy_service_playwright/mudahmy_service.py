@@ -99,7 +99,7 @@ class MudahMyService:
     def init_browser(self):
         self.playwright = sync_playwright().start()
         launch_kwargs = {
-            "headless": True,
+            "headless": False,
             "args": [
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",

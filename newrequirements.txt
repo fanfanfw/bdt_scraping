@@ -1,7 +1,7 @@
 APScheduler==3.11.0
 attrs==25.1.0
 beautifulsoup4==4.13.4
-blinker==1.7.0
+blinker==1.9
 Brotli==1.1.0
 bs4==0.0.2
 certifi==2025.1.31
@@ -32,7 +32,7 @@ playwright==1.51.0
 playwright-stealth==1.0.6
 pluggy==1.5.0
 psutil==7.0.0
-psycopg2==2.9.10
+psycopg2-binary==2.9.10
 pyasn1==0.6.1
 pycparser==2.22
 pyee==12.1.1

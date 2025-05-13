@@ -1,6 +1,7 @@
 docs
 test
 myenv
+scrapenv
 
 scrap_service/carlistmy_service/.env
 scrap_service/carlistmy_service_null_scrap/.env
