@@ -125,7 +125,7 @@ class MudahMyService:
         self.browser = self.playwright.chromium.launch(**launch_kwargs)
         self.context = self.browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1366, "height": 768},
+            viewport={"width": 1920, "height": 1080},  # Set to full page size
             locale="en-US",
             timezone_id="Asia/Kuala_Lumpur"
         )
@@ -157,7 +157,7 @@ class MudahMyService:
                 if attempt == retries:
                     logging.error("Gagal mendapatkan IP setelah beberapa percoaan")
                 else:
-                    time.sleep(3)
+                    time.sleep(7)
 
     def scrape_page(self, page, url):
         """
@@ -166,7 +166,7 @@ class MudahMyService:
         """
         try:
             self.get_current_ip(page)
-            delay = random.uniform(3, 7)
+            delay = random.uniform(5, 10)
             logging.info(f"Menuju {url} (delay {delay:.1f}s)")
             time.sleep(delay)
             page.goto(url, timeout=60000)
@@ -316,7 +316,7 @@ class MudahMyService:
                 attempt += 1
                 if attempt < max_retries:
                     logging.warning(f"Mencoba ulang detail scraping untuk {url} (Attempt {attempt+1})...")
-                    time.sleep(random.uniform(5, 10))
+                    time.sleep(random.uniform(15, 20))
                 else:
                     logging.warning(f"Gagal mengambil detail untuk URL: {url}")
                     return None
@@ -355,24 +355,22 @@ class MudahMyService:
                                 if attempt == max_db_retries:
                                     logging.error(f"❌ Gagal simpan data setelah {max_db_retries} percobaan: {url}")
                                 else:
-                                    time.sleep(2)
+                                    time.sleep(20)
                         total_scraped += 1
                     else:
                         logging.warning(f"Gagal mengambil detail untuk URL: {url}")
 
-                    delay = random.uniform(2, 5)
+                    delay = random.uniform(15, 35)
                     logging.info(f"Menunggu {delay:.1f} detik sebelum listing berikutnya...")
                     time.sleep(delay)
 
-                    # Re-init browser setiap kali batch_size tercapai
-                    if total_scraped % self.batch_size == 0 and total_scraped != 0:
-                        logging.info(f"Batch {self.batch_size} listing tercapai, reinit browser.")
-                        self.quit_browser()
-                        time.sleep(3)
-                        self.init_browser()
+                # Re-init browser sebelum halaman berikutnya
+                self.quit_browser()
+                time.sleep(3)
+                self.init_browser()
 
                 current_page += 1
-                delay = random.uniform(5, 10)
+                delay = random.uniform(300, 600)  # 5-10 menit
                 logging.info(f"Menunggu {delay:.1f} detik sebelum halaman berikutnya...")
                 time.sleep(delay)
 
