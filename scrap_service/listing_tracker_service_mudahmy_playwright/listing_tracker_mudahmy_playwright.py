@@ -2,6 +2,7 @@ import os
 import time
 import random
 import logging
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright, TimeoutError
@@ -26,7 +27,7 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.FileHandler(log_file),
-        logging.StreamHandler()
+        logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger("tracker")
@@ -77,7 +78,7 @@ def should_use_proxy():
 
 
 class ListingTrackerMudahmyPlaywright:
-    def __init__(self, batch_size=25):
+    def __init__(self, batch_size=5):
         self.batch_size = batch_size
         self.redirect_url = "https://www.mudah.my/malaysia/cars-for-sale"
         self.active_selector = "#ad_view_ad_highlights h1"
@@ -111,7 +112,7 @@ class ListingTrackerMudahmyPlaywright:
         self.playwright = sync_playwright().start()
 
         launch_kwargs = {
-            "headless": True,
+            "headless": False,
             "args": [
                 "--disable-blink-features=AutomationControlled",
                 "--no-sandbox",
@@ -196,6 +197,7 @@ class ListingTrackerMudahmyPlaywright:
     def random_delay(self, min_d=11, max_d=33):
         delay = random.uniform(min_d, max_d)
         logger.info(f"⏱️ Delay acak antar listing: {delay:.2f} detik")
+        sys.stdout.flush()  # pastikan log langsung keluar
         time.sleep(delay)
 
     def is_redirected(self, title, url):
@@ -229,24 +231,30 @@ class ListingTrackerMudahmyPlaywright:
             cursor.close()
             conn.close()
 
-    def track_listings(self, start_id=1):
+    def track_listings(self, start_id=1, status_filter='all'):
         conn = get_database_connection()
         if not conn:
             logger.error("Koneksi database gagal, tidak bisa memulai tracking.")
             return
 
+        status_condition = {
+            'all': "status IN ('active', 'unknown')",
+            'active': "status = 'active'",
+            'unknown': "status = 'unknown'"
+        }.get(status_filter.lower(), "status IN ('active', 'unknown')")
+
         cursor = conn.cursor()
         cursor.execute(f"""
             SELECT id, listing_url, status
             FROM {DB_TABLE_PRIMARY}
-            WHERE (status = 'active' OR status = 'unknown') AND id >= %s
+            WHERE {status_condition} AND id >= %s
             ORDER BY id
         """, (start_id,))
         listings = cursor.fetchall()
         cursor.close()
         conn.close()
 
-        logger.info(f"📄 Total data: {len(listings)}")
+        logger.info(f"📄 Total data: {len(listings)} (Filter: {status_filter})")
 
         url_count = 0
 
@@ -266,6 +274,8 @@ class ListingTrackerMudahmyPlaywright:
 
             for car_id, url, current_status in batch:
                 logger.info(f"🔍 Memeriksa ID={car_id} - {url}")
+                redirected_sold = False
+
                 try:
                     self.page.goto(url, wait_until="networkidle", timeout=30000)
 
@@ -275,15 +285,29 @@ class ListingTrackerMudahmyPlaywright:
                         self.retry_with_new_proxy()
                         continue
 
-                    if self.page.locator(self.active_selector).count() > 0:
-                        logger.info(f"> ID={car_id} => Aktif (H1 ditemukan)")
-                        self.update_car_status(car_id, "active")
-                    else:
-                        content = self.page.content().lower()
-                        if self.sold_text_indicator.lower() in content:
+                    try:
+                        current_url = self.page.evaluate("() => window.location.href")
+                        title = self.page.evaluate("() => document.title")
+                        logger.info(f"🔎 [Fallback JS] URL = {current_url}")
+                        logger.info(f"🔎 [Fallback JS] Title = {title}")
+                        if self.is_redirected(title, current_url):
+                            logger.info(f"🔁 ID={car_id} => Redirect terdeteksi. Tandai sebagai SOLD.")
                             self.update_car_status(car_id, "sold", datetime.now())
+                            redirected_sold = True
+                    except Exception as eval_err:
+                        logger.warning(f"⚠️ Gagal evaluasi fallback JS untuk ID={car_id}: {eval_err}")
+
+                    # Hanya lanjut cek h1 dan konten jika belum redirect
+                    if not redirected_sold:
+                        if self.page.locator(self.active_selector).count() > 0:
+                            logger.info(f"> ID={car_id} => Aktif (H1 ditemukan)")
+                            self.update_car_status(car_id, "active")
                         else:
-                            self.update_car_status(car_id, "unknown")
+                            content = self.page.content().lower()
+                            if self.sold_text_indicator.lower() in content:
+                                self.update_car_status(car_id, "sold", datetime.now())
+                            else:
+                                self.update_car_status(car_id, "unknown")
 
                 except TimeoutError:
                     logger.warning(f"⚠️ Timeout saat memeriksa ID={car_id}. Coba cek redirect secara manual...")
@@ -312,17 +336,21 @@ class ListingTrackerMudahmyPlaywright:
                     take_screenshot(self.page, f"error_{car_id}")
                     self.update_car_status(car_id, "unknown")
 
+                # ✅ Delay selalu dijalankan
                 self.random_delay()
 
+                # ✅ Mini pause
                 if url_count % random.randint(5, 9) == 0:
                     pause_duration = random.uniform(20, 60)
                     logger.info(f"⏸️ Mini pause {pause_duration:.2f} detik untuk menghindari deteksi bot...")
                     time.sleep(pause_duration)
 
                 url_count += 1
+
+                # ✅ Long break tiap 25 URL
                 if url_count % 25 == 0:
-                    break_time = random.uniform(606, 1122)  # 1-2 jam dalam detik
-                    logger.info(f"💤 Sudah memeriksa {url_count} URL. Istirahat selama {break_time / 3600:.2f} jam...")
+                    break_time = random.uniform(606, 1122)
+                    logger.info(f"💤 Sudah memeriksa {url_count} URL. Istirahat selama {break_time / 60:.2f} menit...")
                     time.sleep(break_time)
 
             self.quit_browser()
