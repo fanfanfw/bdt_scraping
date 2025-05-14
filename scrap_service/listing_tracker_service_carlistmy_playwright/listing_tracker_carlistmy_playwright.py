@@ -76,8 +76,8 @@ def should_use_proxy():
 
 
 class ListingTrackerCarlistmyPlaywright:
-    def __init__(self, batch_size=25):
-        self.batch_size = batch_size
+    def __init__(self, listings_per_batch=5):
+        self.listings_per_batch = listings_per_batch
         self.sold_selector = "h2"
         self.sold_text_indicator = "This car has already been sold."
         self.active_selector = "h1"
@@ -109,7 +109,6 @@ class ListingTrackerCarlistmyPlaywright:
         self.playwright = sync_playwright().start()
 
         launch_kwargs = {
-            # Saat debugging, set headless=False agar terlihat prosesnya
             "headless": False,
             "args": ["--disable-blink-features=AutomationControlled", "--no-sandbox"]
         }
@@ -132,9 +131,6 @@ class ListingTrackerCarlistmyPlaywright:
             permissions=["geolocation"]
         )
 
-        # Saat debugging, komentar baris ini jika perlu memuat gambar agar page load-nya tidak menunggu terlalu lama
-        # self.context.route("**/*", lambda route, request: route.abort() if request.resource_type == "image" else route.continue_())
-
         self.page = self.context.new_page()
         stealth_sync(self.page)
         logging.info("✅ Browser Playwright berhasil diinisialisasi.")
@@ -154,9 +150,14 @@ class ListingTrackerCarlistmyPlaywright:
 
     def retry_with_new_proxy(self):
         self.quit_browser()
+        time.sleep(random.uniform(10, 15))  # cooldown ringan
         self.session_id = self.generate_session_id()
         self.init_browser()
-        logging.info("🔁 Browser reinit dengan session proxy baru.")
+        self.check_current_ip()
+        wait_time = random.uniform(300, 900)
+        logger.info(f"🕒 Jeda {wait_time:.2f} detik setelah cek IP...")
+        time.sleep(wait_time)
+        logger.info("🔁 Selesai reinit.")
 
     def quit_browser(self):
         try:
@@ -169,8 +170,20 @@ class ListingTrackerCarlistmyPlaywright:
             pass
         logger.info("🛑 Browser Playwright ditutup.")
 
-    def random_delay(self, min_d=3, max_d=7):
-        time.sleep(random.uniform(min_d, max_d))
+    def random_delay(self, min_d=30, max_d=60):
+        """Random delay between actions with default 30-60 seconds"""
+        delay = random.uniform(min_d, max_d)
+        logger.info(f"⏳ Jeda selama {delay:.2f} detik...")
+        time.sleep(delay)
+
+    def check_current_ip(self):
+        """Cek IP saat ini menggunakan ip.oxylabs.io"""
+        try:
+            self.page.goto("https://ip.oxylabs.io/", timeout=10000)
+            ip = self.page.inner_text("body").strip()
+            logger.info(f"🌐 IP saat ini: {ip}")
+        except Exception as e:
+            logger.warning(f"❌ Gagal mengecek IP: {e}")
 
     def update_car_status(self, car_id, status, sold_at=None):
         conn = get_database_connection()
@@ -196,86 +209,74 @@ class ListingTrackerCarlistmyPlaywright:
             cursor.close()
             conn.close()
 
-    def track_listings(self, start_id=1):
+    def detect_cloudflare_block(self):
+        try:
+            title = self.page.title()
+            if "Just a moment..." in title:
+                take_screenshot(self.page, "cloudflare_block")
+                logger.warning("⚠️ Terblokir Cloudflare, reinit browser & ganti proxy.")
+                return True
+            return False
+        except Exception as e:
+            logger.warning(f"❌ Gagal cek title: {e}")
+            return False
+
+    def track_listings(self, start_id=1, status_filter="all"):
+        if status_filter not in ["all", "active", "unknown"]:
+            logger.warning(f"⚠️ Status filter tidak valid: {status_filter}, fallback ke 'all'")
+            status_filter = "all"
+
         conn = get_database_connection()
         if not conn:
-            logger.error("Koneksi database gagal, tidak bisa memulai tracking.")
+            logger.error("❌ Gagal koneksi database.")
             return
 
         cursor = conn.cursor()
-        cursor.execute(f"""
-            SELECT id, listing_url, status
-            FROM {DB_TABLE_PRIMARY}
-            WHERE (status = 'active' OR status = 'unknown') AND id >= %s
-            ORDER BY id
-        """, (start_id,))
+        if status_filter == "all":
+            cursor.execute(f"""
+                SELECT id, listing_url, status
+                FROM {DB_TABLE_PRIMARY}
+                WHERE id >= %s
+                ORDER BY id
+            """, (start_id,))
+        else:
+            cursor.execute(f"""
+                SELECT id, listing_url, status
+                FROM {DB_TABLE_PRIMARY}
+                WHERE status = %s AND id >= %s
+                ORDER BY id
+            """, (status_filter, start_id))
         listings = cursor.fetchall()
         cursor.close()
         conn.close()
 
-        logger.info(f"📄 Total data: {len(listings)}")
+        logger.info(f"📄 Total data: {len(listings)} | Reinit setiap {self.listings_per_batch} listing")
 
-        # 1) Buka browser sekali saja.
         self.init_browser()
+        self.check_current_ip()
+        time.sleep(random.uniform(15, 20))  # jeda setelah cek IP
 
-        for car_id, url, current_status in listings:
-            logger.info(f"🔍 Memeriksa ID={car_id} - {url}")
+        for index, (car_id, url, current_status) in enumerate(listings, start=1):
+            logger.info(f"🔍 Memeriksa ID={car_id} ({index}/{len(listings)})")
 
             try:
-                # 2) Gunakan wait_until=domcontentloaded + timeout lebih lama
                 self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                time.sleep(2)  # bisa diganti self.random_delay() juga
-                self.page.evaluate("window.scrollTo(0, 1000)")
-                self.random_delay()
 
-                # Anti-bot error handling
-                try:
-                    content = self.page.content()
-                except Exception as e:
-                    take_screenshot(self.page, f"antibot_{car_id}")
-                    logger.error(f"❌ Gagal cek anti-bot: {e}")
-                    # Boleh di-continue atau langsung break/exit sesuai kebutuhan
-                    continue
-
-                # Jika terdeteksi CF-block, ganti proxy
-                if self.detect_anti_bot():
+                if self.detect_cloudflare_block():
                     self.retry_with_new_proxy()
-                    # Karena kita reinit browser, self.page berubah.
                     self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
-                    time.sleep(3)
 
-                # 404 Not Found
-                not_found_selector = "h1.zeta.alert.alert--warning"
-                not_found_text = "Page not found."
-                if self.page.locator(not_found_selector).count() > 0:
-                    text_found = self.page.locator(not_found_selector).first.inner_text().strip()
-                    if not_found_text in text_found:
-                        logger.info(f"404 ID={car_id} => Halaman tidak ditemukan, tandai UNKNOWN")
-                        self.update_car_status(car_id, "unknown")
-                        # Lanjut ke listing berikutnya
-                        continue
+                self.random_delay(7, 13)
+                self.page.evaluate("window.scrollTo(0, 1000)")
+                self.random_delay(15, 20)
 
-                # Sold (dari heading)
                 if self.page.locator(self.sold_selector).count() > 0:
                     sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
                     if self.sold_text_indicator in sold_text:
-                        logger.info(f"✅ ID={car_id} => Terjual (deteksi teks sold)")
                         self.update_car_status(car_id, "sold", datetime.now())
                         continue
 
-                # Active (dari judul)
-                if self.page.locator(self.active_selector).count() > 0:
-                    logger.info(f"> ID={car_id} => Aktif (judul ditemukan)")
-                    self.update_car_status(car_id, "active")
-                    continue
-
-                # Fallback: cek konten
-                content_lower = self.page.content().lower()
-                if self.sold_text_indicator.lower() in content_lower:
-                    logger.info(f"🕵️ ID={car_id} => Terjual (fallback by content)")
-                    self.update_car_status(car_id, "sold", datetime.now())
-                else:
-                    self.update_car_status(car_id, "unknown")
+                self.update_car_status(car_id, "active")
 
             except TimeoutError:
                 logger.warning(f"⚠️ Timeout ID={car_id}, tandai UNKNOWN")
@@ -285,15 +286,11 @@ class ListingTrackerCarlistmyPlaywright:
                 logger.error(f"❌ Gagal ID={car_id}: {e}")
                 take_screenshot(self.page, f"error_{car_id}")
                 self.update_car_status(car_id, "unknown")
-            finally:
-                # Jika Anda tidak mau menutup browser di setiap loop,
-                # cukup kosongkan block finally atau tangani hal-hal lain di sini.
-                pass
 
-            # 3) Jeda antar listing agar tidak terlalu agresif
-            self.random_delay(min_d=3, max_d=7)
+            if index % self.listings_per_batch == 0 and index < len(listings):
+                logger.info("🔄 Reinit browser & proxy setelah batch.")
+                self.retry_with_new_proxy()
 
-        # 4) Baru tutup browser kalau semua listing selesai
         self.quit_browser()
+        logger.info("✅ Selesai semua listing.")
 
-        logger.info("✅ Proses tracking selesai.")
