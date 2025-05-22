@@ -309,7 +309,7 @@ class CarlistMyService:
             self.conn.rollback()
             logging.error(f"❌ Error menyimpan ke database: {e}")
 
-    def scrape_all_brands(self, start_brand=None, start_page=1):
+    def scrape_all_brands(self, start_brand=None, start_page=1, continue_next=True):
         self.reset_scraping()
         df = pd.read_csv(INPUT_FILE)
 
@@ -331,6 +331,9 @@ class CarlistMyService:
             if start_brand and brand.lower() == start_brand.lower():
                 current_page = start_page
             else:
+                if not continue_next and brand.lower() != start_brand.lower():
+                    logging.info(f"🛑 Berhenti setelah selesai scraping brand {start_brand}")
+                    break
                 current_page = 1
 
             logging.info(f"🚀 Mulai scraping brand: {brand} dengan start_page={current_page}")
@@ -353,6 +356,7 @@ class CarlistMyService:
                     try:
                         logging.info(f"📄 Scraping halaman {page}: {paginated_url}")
                         self.page.goto(paginated_url, timeout=60000)
+                        time.sleep(7)  # Tunggu sebentar setelah halaman dimuat
                         page_loaded = True
                     except Exception as e:
                         page_retry_count += 1
@@ -371,6 +375,8 @@ class CarlistMyService:
                             continue
                         else:
                             logging.error(f"❌ Gagal memuat halaman {page} setelah {max_page_retries} percobaan")
+                            if not continue_next and brand.lower() == start_brand.lower():
+                                self.stop_flag = True
                             break
 
                 if not page_loaded:
@@ -391,9 +397,11 @@ class CarlistMyService:
                 if not urls:
                     logging.warning(f"📄 Ditemukan 0 listing URL di halaman {page}")
                     take_screenshot(self.page, f"no_listing_page{page}_{brand}")
+                    if not continue_next and brand.lower() == start_brand.lower():
+                        logging.info(f"🏁 Selesai scraping brand {brand}")
+                        self.stop_flag = True
                     break
 
-                # ... rest of the existing code ...
                 logging.info("⏳ Menunggu selama 15-30 detik sebelum melanjutkan...")
                 time.sleep(random.uniform(17, 39))
 
@@ -421,8 +429,12 @@ class CarlistMyService:
                 time.sleep(random.uniform(5, 10))
 
             self.quit_browser()
+            
+            if self.stop_flag and not continue_next:
+                logging.info(f"🏁 Berhenti setelah selesai scraping brand {brand}")
+                break
 
-        logging.info("✅ Semua brand telah selesai diproses.")
+        logging.info("✅ Proses scraping selesai.")
 
     def sync_to_cars(self):
         """
