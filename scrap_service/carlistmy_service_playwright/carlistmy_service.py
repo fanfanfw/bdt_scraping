@@ -210,14 +210,22 @@ class CarlistMyService:
                     def extract(selector):
                         element = soup.select_one(selector)
                         return element.text.strip() if element else None
+                    
+                    def get_location_parts(soup):
+                        # Ambil semua span child
+                        spans = soup.select("div.c-card__body > div.u-flex.u-align-items-center > div > div > span")
+                        valid_spans = [span.text.strip() for span in spans if span.text.strip()]
+                        if len(valid_spans) >= 2:
+                            return " - ".join(valid_spans[-2:])
+                        elif len(valid_spans) == 1:
+                            return valid_spans[0]
+                        return ""
 
                     brand = extract("#listing-detail li:nth-child(3) > a > span")
                     model = extract("#listing-detail li:nth-child(4) > a > span")
                     variant = extract("#listing-detail li:nth-child(5) > a > span")
                     informasi_iklan = extract("div:nth-child(1) > span.u-color-muted")
-                    lokasi_part1 = extract("div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(2)")
-                    lokasi_part2 = extract("div.c-card__body > div.u-flex.u-align-items-center > div > div > span:nth-child(3)")
-                    lokasi = " - ".join(filter(None, [lokasi_part1, lokasi_part2]))
+                    lokasi = get_location_parts(soup)
 
                     price_string = extract("div.listing__item-price > h3")
                     year = extract("div.owl-stage div:nth-child(2) span.u-text-bold")
