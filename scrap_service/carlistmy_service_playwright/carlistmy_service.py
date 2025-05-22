@@ -342,16 +342,39 @@ class CarlistMyService:
                 logging.warning(f"Gagal get IP: {e}")
 
             page = current_page
+            max_page_retries = 3  # Maksimal percobaan untuk setiap halaman
+            
             while not self.stop_flag:
                 paginated_url = re.sub(r"(page_number=)\d+", lambda m: f"{m.group(1)}{page}", base_url)
-                logging.info(f"📄 Scraping halaman {page}: {paginated_url}")
+                page_retry_count = 0
+                page_loaded = False
 
-                try:
-                    self.page.goto(paginated_url, timeout=60000)
-                except Exception as e:
-                    logging.warning(f"❌ Gagal memuat halaman {paginated_url}: {e}")
-                    take_screenshot(self.page, f"page_load_error_{brand}_{page}")
-                    break
+                while page_retry_count < max_page_retries and not page_loaded:
+                    try:
+                        logging.info(f"📄 Scraping halaman {page}: {paginated_url}")
+                        self.page.goto(paginated_url, timeout=60000)
+                        page_loaded = True
+                    except Exception as e:
+                        page_retry_count += 1
+                        logging.warning(f"❌ Gagal memuat halaman {paginated_url}: {e}")
+                        take_screenshot(self.page, f"page_load_error_{brand}_{page}")
+                        
+                        if page_retry_count < max_page_retries:
+                            logging.info(f"🔄 Mencoba ulang halaman {page} (percobaan ke-{page_retry_count + 1})")
+                            self.quit_browser()
+                            time.sleep(10)  # Tunggu sebentar sebelum reinit
+                            self.init_browser()
+                            try:
+                                self.get_current_ip()
+                            except Exception as e:
+                                logging.warning(f"Gagal get IP: {e}")
+                            continue
+                        else:
+                            logging.error(f"❌ Gagal memuat halaman {page} setelah {max_page_retries} percobaan")
+                            break
+
+                if not page_loaded:
+                    break  # Keluar dari loop halaman jika gagal setelah max retry
 
                 html = self.page.content()
                 soup = BeautifulSoup(html, "html.parser")
@@ -370,6 +393,7 @@ class CarlistMyService:
                     take_screenshot(self.page, f"no_listing_page{page}_{brand}")
                     break
 
+                # ... rest of the existing code ...
                 logging.info("⏳ Menunggu selama 15-30 detik sebelum melanjutkan...")
                 time.sleep(random.uniform(17, 39))
 
@@ -381,7 +405,7 @@ class CarlistMyService:
                     if detail:
                         self.save_to_db(detail)
                         self.listing_count += 1
-                        time.sleep(random.uniform(20, 40))  # Tunggu selama 15-20 detik secara acak antara detail
+                        time.sleep(random.uniform(20, 40))
 
                         if self.listing_count >= self.batch_size:
                             self.quit_browser()
