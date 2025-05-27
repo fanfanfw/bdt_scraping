@@ -94,7 +94,8 @@ def check_proxy_ip(browser_type, proxy):
         page = browser.new_page()
         page.goto("https://ip.oxylabs.io/", timeout=15000)
         ip = page.inner_text("body").strip()
-        log_info(f"✅ Proxy OK, IP: {ip}")
+        log_info(f"ini browser dengan proxy: {proxy['server']}")
+        log_info(f"cek ip: {ip}")
         browser.close()
         return True
     except Exception as e:
@@ -130,13 +131,27 @@ def get_next_page_url(page, retries=3, delay=3):
                 if text in [">", "›", "Next", "»"]:
                     href = a.get_attribute("href")
                     if href and href.strip():
-                        log_info(f"➡️  Next page detected (retry {attempt+1})")
+                        log_info(f"Next page detected (retry {attempt+1})")
                         return href
         except Exception as e:
             log_info(f"Retry {attempt+1}: Error detecting pagination: {e}")
         time.sleep(delay)
-    log_info("⚠️  No next page found after retries.")
+    log_info("No next page found after retries.")
     return None
+
+def init_browser_with_proxy(browser_type, proxies):
+    candidates = proxies.copy()
+    while candidates:
+        proxy_try = random.choice(candidates)
+        log_info(f"🌐 Trying proxy: {proxy_try['server']}")
+        if check_proxy_ip(browser_type, proxy_try):
+            browser = browser_type.launch(headless=False, proxy=proxy_try)
+            page = browser.new_page()
+            return browser, page, proxy_try
+        else:
+            candidates.remove(proxy_try)
+    log_info("🚨 No valid proxy found.")
+    return None, None, None
 
 def main():
     urls = read_urls_from_csv(INPUT_CSV)
@@ -151,51 +166,56 @@ def main():
         base_url = "https://postcode.my"
 
         for base_url_with_page in urls:
-            proxy = None
-            candidates = proxies.copy()
-            while candidates:
-                proxy_try = random.choice(candidates)
-                log_info(f"🌐 Trying proxy: {proxy_try['server']}")
-                if check_proxy_ip(browser_type, proxy_try):
-                    proxy = proxy_try
-                    break
+            retry_url_count = 0
+            max_url_retries = 2
+
+            while retry_url_count <= max_url_retries:
+                browser, page, current_proxy = init_browser_with_proxy(browser_type, proxies)
+                if browser is None:
+                    log_info("Exiting program due to no available proxies.")
+                    return
+
+                current_url = base_url_with_page
+                if retry_url_count == 0:
+                    log_info(f"memeriksa : {current_url}")
                 else:
-                    candidates.remove(proxy_try)
-            if proxy is None:
-                log_info("🚨 No valid proxy found. Skipping URL.")
-                continue
+                    log_info(f"memeriksa retry ({retry_url_count}/{max_url_retries}) : {current_url}")
 
-            browser = browser_type.launch(headless=False, proxy=proxy)
-            page = browser.new_page()
-            current_url = base_url_with_page
-
-            while True:
                 try:
-                    page.goto(current_url, timeout=60000)
-                    time.sleep(5)
-                    handle_consent_popup(page)
-                    page.wait_for_selector("#t2", timeout=30000)
+                    while True:
+                        page.goto(current_url, timeout=60000)
+                        time.sleep(5)
+                        handle_consent_popup(page)
+                        page.wait_for_selector("#t2", timeout=30000)
 
-                    links = scrape_links_from_page(page)
-                    full_links = [link if link.startswith("http") else base_url + link for link in links]
+                        links = scrape_links_from_page(page)
+                        full_links = [link if link.startswith("http") else base_url + link for link in links]
 
-                    write_links_to_csv(OUTPUT_CSV, [(current_url, link) for link in full_links])
-                    log_info(f"✅ {len(full_links)} links scraped from {current_url}")
+                        write_links_to_csv(OUTPUT_CSV, [(current_url, link) for link in full_links])
+                        log_info(f"ditemukan {len(full_links)} links")
 
-                    time.sleep(random.uniform(15, 30))
+                        next_href = get_next_page_url(page)
+                        if next_href:
+                            current_url = base_url + next_href
+                            log_info(f"Next: {current_url}")
+                            delay = random.uniform(15, 30)
+                            log_info(f"tunggu {delay:.1f} detik")
+                            time.sleep(delay)
+                        else:
+                            log_info(f"✅ Done scraping all pages for {base_url_with_page}")
+                            break
 
-                    next_href = get_next_page_url(page)
-                    if next_href:
-                        current_url = base_url + next_href
-                        log_info(f"➡️  Next: {current_url}")
-                    else:
-                        log_info(f"✅ Done scraping all pages for {base_url_with_page}")
-                        break
+                    browser.close()
+                    break  # keluar dari retry loop jika sukses
+
                 except Exception as e:
-                    log_info(f"❌ Error scraping {current_url}: {e}")
-                    break
-
-            browser.close()
+                    log_info(f"Error scraping {current_url}: {e}")
+                    retry_url_count += 1
+                    log_info(f"melakukan retry ({retry_url_count}/{max_url_retries})")
+                    browser.close()
+                    if retry_url_count > max_url_retries:
+                        log_info(f"Gagal scrap {current_url} setelah {max_url_retries} percobaan.")
+                        break
 
     log_info(f"🎉 Scraping complete. Data saved to {OUTPUT_CSV}")
 
