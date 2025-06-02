@@ -150,14 +150,12 @@ class ListingTrackerCarlistmyPlaywright:
 
     def retry_with_new_proxy(self):
         self.quit_browser()
-        time.sleep(random.uniform(10, 15))  # cooldown ringan
+        time.sleep(random.uniform(5, 8))
         self.session_id = self.generate_session_id()
         self.init_browser()
-        self.check_current_ip()
-        wait_time = random.uniform(300, 900)
-        logger.info(f"🕒 Jeda {wait_time:.2f} detik setelah cek IP...")
-        time.sleep(wait_time)
-        logger.info("🔁 Selesai reinit.")
+        logger.info(f"🔁 Reinit browser dengan session ID baru: {self.session_id}")
+        # Tidak ada lagi self.check_current_ip()
+        time.sleep(random.uniform(3, 5))
 
     def quit_browser(self):
         try:
@@ -175,20 +173,6 @@ class ListingTrackerCarlistmyPlaywright:
         delay = random.uniform(min_d, max_d)
         logger.info(f"⏳ Jeda selama {delay:.2f} detik...")
         time.sleep(delay)
-
-    def check_current_ip(self, retries=3):
-        for attempt in range(retries):
-            try:
-                self.page.goto("https://ip.oxylabs.io/", timeout=15000, wait_until="networkidle")
-                time.sleep(3)
-                ip = self.page.inner_text("body").strip()
-                logger.info(f"🌐 IP saat ini: {ip}")
-                return ip
-            except Exception as e:
-                logger.warning(f"Gagal IP check percobaan {attempt + 1}/{retries}: {e}")
-                take_screenshot(self.page, f"ip_check_failed_attempt_{attempt + 1}")
-                time.sleep(5)
-        raise Exception("❌ IP check gagal setelah 3 kali percobaan.")
 
     def update_car_status(self, car_id, status, sold_at=None):
         conn = get_database_connection()
@@ -258,11 +242,7 @@ class ListingTrackerCarlistmyPlaywright:
         logger.info(f"📄 Total data: {len(listings)} | Reinit setiap {self.listings_per_batch} listing")
 
         self.init_browser()
-        try:
-            self.check_current_ip()
-        except Exception as e:
-            logger.warning(f"⚠️ Gagal check IP saat init awal: {e}")
-        time.sleep(random.uniform(5, 10))  # jeda awal sebelum mulai loop
+        time.sleep(random.uniform(15, 20))  # jeda setelah cek IP
 
         for index, (car_id, url, current_status) in enumerate(listings, start=1):
             logger.info(f"🔍 Memeriksa ID={car_id} ({index}/{len(listings)})")
