@@ -177,12 +177,14 @@ class ListingTrackerCarlistmyPlaywright:
         time.sleep(delay)
 
     def check_current_ip(self):
-        """Cek IP saat ini menggunakan ip.oxylabs.io"""
         try:
-            self.page.goto("https://ip.oxylabs.io/", timeout=10000)
+            response = self.page.goto("https://ip.oxylabs.io/", timeout=30000)
+            if not response or not response.ok:
+                raise Exception("IP page did not load properly.")
             ip = self.page.inner_text("body").strip()
             logger.info(f"🌐 IP saat ini: {ip}")
         except Exception as e:
+            take_screenshot(self.page, "ip_check_failed")
             logger.warning(f"❌ Gagal mengecek IP: {e}")
 
     def update_car_status(self, car_id, status, sold_at=None):
@@ -258,13 +260,20 @@ class ListingTrackerCarlistmyPlaywright:
 
         for index, (car_id, url, current_status) in enumerate(listings, start=1):
             logger.info(f"🔍 Memeriksa ID={car_id} ({index}/{len(listings)})")
-
             try:
-                self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                try:
+                    self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
+                except TimeoutError:
+                    logger.warning(f"⚠️ Timeout pertama ID={car_id}, coba reinit proxy dan retry...")
+                    self.retry_with_new_proxy()
+                    try:
+                        self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
+                    except TimeoutError:
+                        raise  # biar langsung lompat ke outer except
 
                 if self.detect_cloudflare_block():
                     self.retry_with_new_proxy()
-                    self.page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                    self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
 
                 self.random_delay(7, 13)
                 self.page.evaluate("window.scrollTo(0, 1000)")
@@ -279,7 +288,7 @@ class ListingTrackerCarlistmyPlaywright:
                 self.update_car_status(car_id, "active")
 
             except TimeoutError:
-                logger.warning(f"⚠️ Timeout ID={car_id}, tandai UNKNOWN")
+                logger.warning(f"⚠️ Timeout kedua ID={car_id}, tandai UNKNOWN")
                 take_screenshot(self.page, f"timeout_{car_id}")
                 self.update_car_status(car_id, "unknown")
             except Exception as e:
