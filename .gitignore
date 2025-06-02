@@ -27,3 +27,5 @@ scrap_test2_carlistmy
 newenv/
 
 json_to_csv_converter.py
+
+logs/*
