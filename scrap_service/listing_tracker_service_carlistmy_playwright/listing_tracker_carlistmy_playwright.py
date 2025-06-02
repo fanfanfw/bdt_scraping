@@ -76,7 +76,7 @@ def should_use_proxy():
 
 
 class ListingTrackerCarlistmyPlaywright:
-    def __init__(self, listings_per_batch=5):
+    def __init__(self, listings_per_batch=15):
         self.listings_per_batch = listings_per_batch
         self.sold_selector = "h2"
         self.sold_text_indicator = "This car has already been sold."
@@ -176,16 +176,19 @@ class ListingTrackerCarlistmyPlaywright:
         logger.info(f"⏳ Jeda selama {delay:.2f} detik...")
         time.sleep(delay)
 
-    def check_current_ip(self):
-        try:
-            response = self.page.goto("https://ip.oxylabs.io/", timeout=30000)
-            if not response or not response.ok:
-                raise Exception("IP page did not load properly.")
-            ip = self.page.inner_text("body").strip()
-            logger.info(f"🌐 IP saat ini: {ip}")
-        except Exception as e:
-            take_screenshot(self.page, "ip_check_failed")
-            logger.warning(f"❌ Gagal mengecek IP: {e}")
+    def check_current_ip(self, retries=3):
+        for attempt in range(retries):
+            try:
+                self.page.goto("https://ip.oxylabs.io/", timeout=15000, wait_until="networkidle")
+                time.sleep(3)
+                ip = self.page.inner_text("body").strip()
+                logger.info(f"🌐 IP saat ini: {ip}")
+                return ip
+            except Exception as e:
+                logger.warning(f"Gagal IP check percobaan {attempt + 1}/{retries}: {e}")
+                take_screenshot(self.page, f"ip_check_failed_attempt_{attempt + 1}")
+                time.sleep(5)
+        raise Exception("❌ IP check gagal setelah 3 kali percobaan.")
 
     def update_car_status(self, car_id, status, sold_at=None):
         conn = get_database_connection()
@@ -255,45 +258,52 @@ class ListingTrackerCarlistmyPlaywright:
         logger.info(f"📄 Total data: {len(listings)} | Reinit setiap {self.listings_per_batch} listing")
 
         self.init_browser()
-        self.check_current_ip()
-        time.sleep(random.uniform(15, 20))  # jeda setelah cek IP
+        try:
+            self.check_current_ip()
+        except Exception as e:
+            logger.warning(f"⚠️ Gagal check IP saat init awal: {e}")
+        time.sleep(random.uniform(5, 10))  # jeda awal sebelum mulai loop
 
         for index, (car_id, url, current_status) in enumerate(listings, start=1):
             logger.info(f"🔍 Memeriksa ID={car_id} ({index}/{len(listings)})")
-            try:
+
+            max_retries = 3
+            retry_count = 0
+            success = False
+
+            while retry_count < max_retries:
                 try:
-                    self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
-                except TimeoutError:
-                    logger.warning(f"⚠️ Timeout pertama ID={car_id}, coba reinit proxy dan retry...")
-                    self.retry_with_new_proxy()
-                    try:
-                        self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
-                    except TimeoutError:
-                        raise  # biar langsung lompat ke outer except
+                    self.page.goto(url, wait_until="networkidle", timeout=90000)
+                    time.sleep(7)
 
-                if self.detect_cloudflare_block():
-                    self.retry_with_new_proxy()
-                    self.page.goto(url, wait_until="domcontentloaded", timeout=90000)
-
-                self.random_delay(7, 13)
-                self.page.evaluate("window.scrollTo(0, 1000)")
-                self.random_delay(15, 20)
-
-                if self.page.locator(self.sold_selector).count() > 0:
-                    sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
-                    if self.sold_text_indicator in sold_text:
-                        self.update_car_status(car_id, "sold", datetime.now())
+                    if self.detect_cloudflare_block():
+                        logger.warning("⚠️ Deteksi Cloudflare, ganti proxy dan retry...")
+                        self.retry_with_new_proxy()
+                        retry_count += 1
                         continue
 
-                self.update_car_status(car_id, "active")
+                    self.page.evaluate("window.scrollTo(0, 1000)")
+                    time.sleep(random.uniform(5, 8))
 
-            except TimeoutError:
-                logger.warning(f"⚠️ Timeout kedua ID={car_id}, tandai UNKNOWN")
-                take_screenshot(self.page, f"timeout_{car_id}")
-                self.update_car_status(car_id, "unknown")
-            except Exception as e:
-                logger.error(f"❌ Gagal ID={car_id}: {e}")
-                take_screenshot(self.page, f"error_{car_id}")
+                    if self.page.locator(self.sold_selector).count() > 0:
+                        sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
+                        if self.sold_text_indicator in sold_text:
+                            self.update_car_status(car_id, "sold", datetime.now())
+                            success = True
+                            break
+
+                    self.update_car_status(car_id, "active")
+                    success = True
+                    break
+
+                except Exception as e:
+                    logger.error(f"❌ Gagal ID={car_id} (percobaan ke-{retry_count + 1}): {e}")
+                    take_screenshot(self.page, f"error_{car_id}_try{retry_count + 1}")
+                    retry_count += 1
+                    self.retry_with_new_proxy()
+
+            if not success:
+                logger.warning(f"⚠️ Gagal total memuat ID={car_id}, tandai UNKNOWN")
                 self.update_car_status(car_id, "unknown")
 
             if index % self.listings_per_batch == 0 and index < len(listings):
@@ -302,4 +312,3 @@ class ListingTrackerCarlistmyPlaywright:
 
         self.quit_browser()
         logger.info("✅ Selesai semua listing.")
-
