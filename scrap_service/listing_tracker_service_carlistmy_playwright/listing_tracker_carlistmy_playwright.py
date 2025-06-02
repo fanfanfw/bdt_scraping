@@ -242,7 +242,7 @@ class ListingTrackerCarlistmyPlaywright:
         logger.info(f"📄 Total data: {len(listings)} | Reinit setiap {self.listings_per_batch} listing")
 
         self.init_browser()
-        time.sleep(random.uniform(15, 20))  # jeda setelah cek IP
+        time.sleep(random.uniform(4, 6))
 
         for index, (car_id, url, current_status) in enumerate(listings, start=1):
             logger.info(f"🔍 Memeriksa ID={car_id} ({index}/{len(listings)})")
@@ -257,15 +257,14 @@ class ListingTrackerCarlistmyPlaywright:
                     time.sleep(7)
 
                     if self.detect_cloudflare_block():
-                        logger.warning("⚠️ Deteksi Cloudflare, ganti proxy dan retry...")
-                        self.retry_with_new_proxy()
-                        retry_count += 1
-                        continue
+                        logger.warning(f"⚠️ Cloudflare terdeteksi di ID={car_id}, ganti proxy...")
+                        raise Exception("Cloudflare detected")
 
                     self.page.evaluate("window.scrollTo(0, 1000)")
                     time.sleep(random.uniform(5, 8))
 
-                    if self.page.locator(self.sold_selector).count() > 0:
+                    sold_count = self.page.locator(self.sold_selector).count()
+                    if sold_count > 0:
                         sold_text = self.page.locator(self.sold_selector).first.inner_text().strip()
                         if self.sold_text_indicator in sold_text:
                             self.update_car_status(car_id, "sold", datetime.now())
@@ -277,13 +276,14 @@ class ListingTrackerCarlistmyPlaywright:
                     break
 
                 except Exception as e:
-                    logger.error(f"❌ Gagal ID={car_id} (percobaan ke-{retry_count + 1}): {e}")
-                    take_screenshot(self.page, f"error_{car_id}_try{retry_count + 1}")
                     retry_count += 1
+                    logger.error(f"❌ Gagal ID={car_id} (percobaan ke-{retry_count}): {e}")
+                    take_screenshot(self.page, f"error_{car_id}_try{retry_count}")
                     self.retry_with_new_proxy()
+                    continue
 
             if not success:
-                logger.warning(f"⚠️ Gagal total memuat ID={car_id}, tandai UNKNOWN")
+                logger.warning(f"⚠️ ID={car_id} gagal total setelah {max_retries} percobaan. Tandai UNKNOWN.")
                 self.update_car_status(car_id, "unknown")
 
             if index % self.listings_per_batch == 0 and index < len(listings):
